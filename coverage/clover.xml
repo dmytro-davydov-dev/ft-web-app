@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1777130136137" clover="3.2.0">
+  <project timestamp="1777130136137" name="All files">
+    <metrics statements="134" coveredstatements="127" conditionals="37" coveredconditionals="27" methods="37" coveredmethods="37" elements="208" coveredelements="191" complexity="0" loc="134" ncloc="134" packages="7" files="14" classes="14"/>
+    <package name="src">
+      <metrics statements="9" coveredstatements="9" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="App.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/App.tsx">
+        <metrics statements="9" coveredstatements="9" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="19" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.components">
+      <metrics statements="30" coveredstatements="30" conditionals="11" coveredconditionals="8" methods="16" coveredmethods="16"/>
+      <file name="AppShell.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/components/AppShell.tsx">
+        <metrics statements="24" coveredstatements="24" conditionals="7" coveredconditionals="4" methods="15" coveredmethods="15"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="50" count="2" type="stmt"/>
+        <line num="51" count="2" type="stmt"/>
+        <line num="54" count="1" type="stmt"/>
+        <line num="55" count="1" type="stmt"/>
+        <line num="58" count="2" type="cond" truecount="1" falsecount="2"/>
+        <line num="60" count="4" type="stmt"/>
+        <line num="65" count="2" type="stmt"/>
+        <line num="76" count="6" type="stmt"/>
+        <line num="79" count="18" type="stmt"/>
+        <line num="84" count="18" type="cond" truecount="2" falsecount="0"/>
+        <line num="131" count="2" type="stmt"/>
+        <line num="141" count="2" type="stmt"/>
+        <line num="148" count="2" type="stmt"/>
+        <line num="155" count="2" type="stmt"/>
+        <line num="162" count="2" type="stmt"/>
+        <line num="169" count="2" type="stmt"/>
+        <line num="177" count="2" type="stmt"/>
+        <line num="186" count="2" type="stmt"/>
+        <line num="193" count="2" type="stmt"/>
+      </file>
+      <file name="ProtectedRoute.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/components/ProtectedRoute.tsx">
+        <metrics statements="6" coveredstatements="6" conditionals="4" coveredconditionals="4" methods="1" coveredmethods="1"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="14" count="3" type="stmt"/>
+        <line num="16" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="18" count="2" type="cond" truecount="2" falsecount="0"/>
+      </file>
+    </package>
+    <package name="src.components.widgets">
+      <metrics statements="20" coveredstatements="20" conditionals="4" coveredconditionals="4" methods="6" coveredmethods="6"/>
+      <file name="ActiveTagsWidget.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/components/widgets/ActiveTagsWidget.tsx">
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="6" count="2" type="stmt"/>
+        <line num="13" count="2" type="stmt"/>
+        <line num="19" count="2" type="stmt"/>
+        <line num="20" count="2" type="stmt"/>
+      </file>
+      <file name="AlertsWidget.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/components/widgets/AlertsWidget.tsx">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="7" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+        <line num="20" count="6" type="stmt"/>
+      </file>
+      <file name="KpiWidget.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/components/widgets/KpiWidget.tsx">
+        <metrics statements="3" coveredstatements="3" conditionals="4" coveredconditionals="4" methods="1" coveredmethods="1"/>
+        <line num="1" count="2" type="stmt"/>
+        <line num="10" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="11" count="6" type="stmt"/>
+      </file>
+      <file name="MapWidget.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/components/widgets/MapWidget.tsx">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="7" count="2" type="stmt"/>
+        <line num="8" count="2" type="stmt"/>
+      </file>
+      <file name="OccupancyWidget.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/components/widgets/OccupancyWidget.tsx">
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="5" count="2" type="stmt"/>
+        <line num="6" count="2" type="stmt"/>
+        <line num="14" count="2" type="stmt"/>
+        <line num="20" count="2" type="stmt"/>
+        <line num="21" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.context">
+      <metrics statements="26" coveredstatements="26" conditionals="6" coveredconditionals="5" methods="6" coveredmethods="6"/>
+      <file name="AuthContext.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/context/AuthContext.tsx">
+        <metrics statements="26" coveredstatements="26" conditionals="6" coveredconditionals="5" methods="6" coveredmethods="6"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="16" count="1" type="stmt"/>
+        <line num="22" count="1" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
+        <line num="38" count="1" type="stmt"/>
+        <line num="39" count="5" type="stmt"/>
+        <line num="40" count="5" type="stmt"/>
+        <line num="41" count="5" type="stmt"/>
+        <line num="43" count="5" type="stmt"/>
+        <line num="44" count="3" type="stmt"/>
+        <line num="45" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="47" count="1" type="stmt"/>
+        <line num="48" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="49" count="1" type="stmt"/>
+        <line num="51" count="1" type="stmt"/>
+        <line num="52" count="1" type="stmt"/>
+        <line num="54" count="2" type="stmt"/>
+        <line num="57" count="3" type="stmt"/>
+        <line num="61" count="1" type="stmt"/>
+        <line num="65" count="1" type="stmt"/>
+        <line num="68" count="5" type="stmt"/>
+        <line num="70" count="5" type="stmt"/>
+        <line num="77" count="1" type="stmt"/>
+        <line num="78" count="7" type="stmt"/>
+        <line num="79" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="80" count="4" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.firebase">
+      <metrics statements="4" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <file name="config.ts" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/firebase/config.ts">
+        <metrics statements="4" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="14" count="0" type="stmt"/>
+        <line num="23" count="0" type="stmt"/>
+        <line num="24" count="0" type="stmt"/>
+        <line num="25" count="0" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.pages">
+      <metrics statements="42" coveredstatements="39" conditionals="16" coveredconditionals="10" methods="7" coveredmethods="7"/>
+      <file name="DashboardPage.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/pages/DashboardPage.tsx">
+        <metrics statements="8" coveredstatements="8" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="1" type="stmt"/>
+        <line num="12" count="1" type="stmt"/>
+        <line num="13" count="1" type="stmt"/>
+        <line num="14" count="1" type="stmt"/>
+        <line num="15" count="1" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+      </file>
+      <file name="LoginPage.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/pages/LoginPage.tsx">
+        <metrics statements="29" coveredstatements="26" conditionals="16" coveredconditionals="10" methods="5" coveredmethods="5"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="6" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+        <line num="11" count="58" type="stmt"/>
+        <line num="12" count="58" type="stmt"/>
+        <line num="14" count="58" type="stmt"/>
+        <line num="15" count="58" type="stmt"/>
+        <line num="16" count="58" type="stmt"/>
+        <line num="17" count="58" type="stmt"/>
+        <line num="20" count="58" type="cond" truecount="3" falsecount="1"/>
+        <line num="23" count="2" type="stmt"/>
+        <line num="24" count="2" type="stmt"/>
+        <line num="25" count="2" type="stmt"/>
+        <line num="26" count="2" type="stmt"/>
+        <line num="27" count="2" type="stmt"/>
+        <line num="28" count="1" type="stmt"/>
+        <line num="30" count="1" type="cond" truecount="1" falsecount="1"/>
+        <line num="31" count="1" type="stmt"/>
+        <line num="33" count="2" type="stmt"/>
+        <line num="37" count="58" type="stmt"/>
+        <line num="55" count="32" type="stmt"/>
+        <line num="68" count="19" type="stmt"/>
+        <line num="87" count="1" type="cond" truecount="2" falsecount="4"/>
+        <line num="91" count="1" type="stmt"/>
+        <line num="93" count="0" type="stmt"/>
+        <line num="95" count="0" type="stmt"/>
+        <line num="97" count="0" type="stmt"/>
+      </file>
+      <file name="SitePage.tsx" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/pages/SitePage.tsx">
+        <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="4" count="1" type="stmt"/>
+        <line num="5" count="1" type="stmt"/>
+        <line num="7" count="1" type="stmt"/>
+        <line num="8" count="1" type="stmt"/>
+        <line num="10" count="1" type="stmt"/>
+      </file>
+    </package>
+    <package name="src.test">
+      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+      <file name="styleMock.ts" path="/Users/dmytrodavydov/Documents/Claude/Projects/Flowterra/ft-web-app/src/test/styleMock.ts">
+        <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
+        <line num="1" count="10" type="stmt"/>
+        <line num="4" count="955" type="stmt"/>
+        <line num="8" count="10" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
