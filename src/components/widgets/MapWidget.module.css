@@ -1,0 +1,67 @@
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-default);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.title {
+  font: var(--font-accent);
+  color: var(--color-text-primary);
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--tint-accent);
+  color: var(--color-accent-primary);
+  font: var(--font-caption);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mapPlaceholder {
+  flex: 1;
+  min-height: 320px;
+  position: relative;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(0,212,255,0.08), transparent 45%),
+    radial-gradient(circle at 70% 60%, rgba(124,58,237,0.08), transparent 45%),
+    linear-gradient(var(--color-border-subtle) 1px, transparent 1px) 0 0 / 32px 32px,
+    linear-gradient(90deg, var(--color-border-subtle) 1px, transparent 1px) 0 0 / 32px 32px,
+    var(--color-bg-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.centerMsg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  text-align: center;
+  padding: var(--space-5);
+  font: var(--font-body-2);
+  color: var(--color-text-secondary);
+}
+
+.centerMsg span { font-size: 32px; }
+
+.sub {
+  font: var(--font-caption);
+  color: var(--color-text-muted);
+  max-width: 300px;
+}

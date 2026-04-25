@@ -1,0 +1,78 @@
+/* ===================================================================
+ * Flowterra — Design System Tokens
+ * Source: raw/UI-designs/tokens.css
+ * =================================================================== */
+
+@import url('https://rsms.me/inter/inter.css');
+
+:root {
+  /* Backgrounds */
+  --color-bg-primary:    #080c14;
+  --color-bg-surface:    #0b1120;
+  --color-bg-card:       #0f1629;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Text */
+  --color-text-primary:   #e2e8f0;
+  --color-text-secondary: #94a3b8;
+  --color-text-muted:     #475569;
+
+  /* Accent */
+  --color-accent-primary: #00d4ff;
+  --color-accent-purple:  #7c3aed;
+
+  /* Semantic */
+  --color-positive: #4ade80;
+  --color-negative: #f87171;
+  --color-warning:  #fbbf24;
+
+  /* Tints */
+  --tint-accent:   rgba(0, 212, 255, 0.10);
+  --tint-purple:   rgba(124, 58, 237, 0.14);
+  --tint-positive: rgba(74, 222, 128, 0.12);
+  --tint-negative: rgba(248, 113, 113, 0.12);
+  --tint-warning:  rgba(251, 191, 36, 0.12);
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display:   700 56px/64px var(--font-family);
+  --font-heading-1: 700 32px/40px var(--font-family);
+  --font-heading-2: 700 24px/32px var(--font-family);
+  --font-body-1:    400 16px/26px var(--font-family);
+  --font-body-2:    400 14px/22px var(--font-family);
+  --font-caption:   400 12px/18px var(--font-family);
+  --font-accent:    700 14px/22px var(--font-family);
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+
+  /* Radius */
+  --radius-small:   4px;
+  --radius-default: 8px;
+  --radius-large:   12px;
+
+  /* Motion */
+  --motion-fast: 150ms ease-out;
+  --motion-std:  200ms ease-out;
+}
+
+/* Reset */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font: var(--font-body-1);
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--color-accent-primary); text-decoration: none; }

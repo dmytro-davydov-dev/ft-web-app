@@ -1,0 +1,104 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  padding: var(--space-4);
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-large);
+  padding: var(--space-6) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.logoMark {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-small);
+  background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-purple));
+}
+
+.logoName {
+  font: var(--font-heading-2);
+  letter-spacing: -0.01em;
+}
+
+.heading {
+  font: var(--font-heading-1);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.sub {
+  font: var(--font-body-2);
+  color: var(--color-text-secondary);
+  margin: calc(-1 * var(--space-2)) 0 0;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font: var(--font-body-2);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.input {
+  height: 44px;
+  padding: 0 var(--space-3);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-default);
+  color: var(--color-text-primary);
+  font: var(--font-body-1);
+  font-family: var(--font-family);
+  transition: border-color var(--motion-std);
+}
+.input:focus { outline: none; border-color: var(--color-accent-primary); }
+.input::placeholder { color: var(--color-text-muted); }
+
+.error {
+  font: var(--font-body-2);
+  color: var(--color-negative);
+  background: var(--tint-negative);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius-default);
+  padding: var(--space-2) var(--space-3);
+}
+
+.submit {
+  margin-top: var(--space-2);
+  height: 44px;
+  border-radius: var(--radius-default);
+  border: none;
+  background: var(--color-accent-primary);
+  color: #041018;
+  font: var(--font-accent);
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: background var(--motion-std);
+}
+.submit:hover:not(:disabled) { background: #33ddff; }
+.submit:disabled { opacity: 0.6; cursor: not-allowed; }
