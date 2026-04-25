@@ -5,8 +5,13 @@
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import styles from './ChartWidget.module.css';
 
+interface StubPoint {
+  t: string;
+  v: number;
+}
+
 // Placeholder flat data so Recharts renders without errors
-const STUB_DATA = [
+const STUB_DATA: StubPoint[] = [
   { t: '00:00', v: 0 }, { t: '04:00', v: 0 },
   { t: '08:00', v: 0 }, { t: '12:00', v: 0 },
   { t: '16:00', v: 0 }, { t: '20:00', v: 0 },

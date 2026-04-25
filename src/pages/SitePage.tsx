@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import styles from './SitePage.module.css';
 
 export default function SitePage() {
-  const { siteId } = useParams();
+  const { siteId } = useParams<{ siteId: string }>();
 
   return (
     <div className={styles.page}>

@@ -5,7 +5,12 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import styles from './ChartWidget.module.css';
 
-const STUB_DATA = [
+interface StubPoint {
+  zone: string;
+  tags: number;
+}
+
+const STUB_DATA: StubPoint[] = [
   { zone: 'A', tags: 0 }, { zone: 'B', tags: 0 },
   { zone: 'C', tags: 0 }, { zone: 'D', tags: 0 },
   { zone: 'E', tags: 0 },

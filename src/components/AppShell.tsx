@@ -2,11 +2,24 @@
  * AppShell — sidebar + topbar layout wrapper.
  * Matches the design from raw/UI-designs/dashboard-ops.html.
  */
+import type { ComponentType } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import styles from './AppShell.module.css';
 
-const NAV_ITEMS = [
+interface NavItem {
+  to: string;
+  label: string;
+  icon: ComponentType;
+  end?: boolean;
+}
+
+interface NavSection {
+  section: string;
+  items: NavItem[];
+}
+
+const NAV_ITEMS: NavSection[] = [
   {
     section: 'Live',
     items: [

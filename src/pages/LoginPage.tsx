@@ -19,7 +19,7 @@ export default function LoginPage() {
   // Already signed in → go straight to dashboard
   if (!loading && user) return <Navigate to="/dashboard" replace />;
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError('');
     setBusy(true);
@@ -27,7 +27,8 @@ export default function LoginPage() {
       await signIn(email, password);
       navigate('/dashboard');
     } catch (err) {
-      setError(friendlyError(err.code));
+      const code = (err as { code?: string }).code ?? '';
+      setError(friendlyError(code));
     } finally {
       setBusy(false);
     }
@@ -82,7 +83,7 @@ export default function LoginPage() {
   );
 }
 
-function friendlyError(code) {
+function friendlyError(code: string): string {
   switch (code) {
     case 'auth/invalid-credential':
     case 'auth/wrong-password':

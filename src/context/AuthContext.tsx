@@ -12,18 +12,32 @@
  *   signOut()     → Promise
  */
 import { createContext, useContext, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
 } from 'firebase/auth';
+import type { User, UserCredential } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
-const AuthContext = createContext(null);
+interface AuthContextType {
+  user: User | null;
+  customerId: string | null;
+  loading: boolean;
+  signIn: (email: string, password: string) => Promise<UserCredential>;
+  signOut: () => Promise<void>;
+}
 
-export function AuthProvider({ children }) {
-  const [user,       setUser]       = useState(null);
-  const [customerId, setCustomerId] = useState(null);
+const AuthContext = createContext<AuthContextType | null>(null);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user,       setUser]       = useState<User | null>(null);
+  const [customerId, setCustomerId] = useState<string | null>(null);
   const [loading,    setLoading]    = useState(true);
 
   useEffect(() => {
@@ -31,7 +45,7 @@ export function AuthProvider({ children }) {
       if (firebaseUser) {
         // Decode custom claims from the ID token
         const tokenResult = await firebaseUser.getIdTokenResult();
-        setCustomerId(tokenResult.claims.customerId ?? null);
+        setCustomerId((tokenResult.claims['customerId'] as string) ?? null);
         setUser(firebaseUser);
       } else {
         setUser(null);
@@ -43,15 +57,15 @@ export function AuthProvider({ children }) {
     return unsubscribe; // cleanup on unmount
   }, []);
 
-  async function signIn(email, password) {
+  async function signIn(email: string, password: string): Promise<UserCredential> {
     return signInWithEmailAndPassword(auth, email, password);
   }
 
-  async function signOut() {
+  async function signOut(): Promise<void> {
     return firebaseSignOut(auth);
   }
 
-  const value = { user, customerId, loading, signIn, signOut };
+  const value: AuthContextType = { user, customerId, loading, signIn, signOut };
 
   return (
     <AuthContext.Provider value={value}>
@@ -60,7 +74,7 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
   return ctx;
