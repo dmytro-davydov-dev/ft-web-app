@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { AuthProvider, useAuth } from './AuthContext';
 import { auth } from '../firebase/config';
 
-const mockOnAuthStateChanged = jest.fn();
+const mockOnIdTokenChanged = jest.fn();
 const mockSignInWithEmailAndPassword = jest.fn();
 const mockFirebaseSignOut = jest.fn();
 
@@ -12,7 +12,7 @@ jest.mock('../firebase/config', () => ({
 }));
 
 jest.mock('firebase/auth', () => ({
-  onAuthStateChanged: (...args: unknown[]) => mockOnAuthStateChanged(...args),
+  onIdTokenChanged: (...args: unknown[]) => mockOnIdTokenChanged(...args),
   signInWithEmailAndPassword: (...args: unknown[]) => mockSignInWithEmailAndPassword(...args),
   signOut: (...args: unknown[]) => mockFirebaseSignOut(...args),
 }));
@@ -44,7 +44,7 @@ describe('AuthContext', () => {
     let listener: ((firebaseUser: any) => Promise<void> | void) | undefined;
     const unsubscribe = jest.fn();
 
-    mockOnAuthStateChanged.mockImplementation((_auth: unknown, callback: typeof listener) => {
+    mockOnIdTokenChanged.mockImplementation((_auth: unknown, callback: typeof listener) => {
       listener = callback;
       return unsubscribe;
     });
@@ -72,7 +72,7 @@ describe('AuthContext', () => {
   });
 
   test('exposes signIn and signOut wrappers', async () => {
-    mockOnAuthStateChanged.mockImplementation((_auth: unknown, callback: (user: null) => void) => {
+    mockOnIdTokenChanged.mockImplementation((_auth: unknown, callback: (user: null) => void) => {
       callback(null);
       return jest.fn();
     });
@@ -99,7 +99,7 @@ describe('AuthContext', () => {
 
   test('cleans up auth listener on unmount', () => {
     const unsubscribe = jest.fn();
-    mockOnAuthStateChanged.mockImplementation(() => unsubscribe);
+    mockOnIdTokenChanged.mockImplementation(() => unsubscribe);
 
     const { unmount } = render(
       <AuthProvider>

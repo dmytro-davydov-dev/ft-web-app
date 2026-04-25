@@ -14,7 +14,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
-  onAuthStateChanged,
+  onIdTokenChanged,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
 } from 'firebase/auth';
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [loading,    setLoading]    = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         // Decode custom claims from the ID token
         const tokenResult = await firebaseUser.getIdTokenResult();
