@@ -1,0 +1,47 @@
+name: Deploy ft-web-app to Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PROJECT_ID: ${{ vars.GCP_PROJECT_DEV || 'flowterra-dev' }}
+
+jobs:
+  deploy:
+    name: Build & Deploy (dev)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Type-check
+        run: yarn typecheck
+
+      - name: Build
+        run: yarn build
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SA_DEV }}
+          # TODO(Phase 3 hardening): replace with WIF
+
+      - name: Deploy to Firebase Hosting
+        run: npx firebase-tools deploy --only hosting --project "${{ env.PROJECT_ID }}" --non-interactive
+
+      - name: Show hosting URL
+        run: echo "✅ https://${{ env.PROJECT_ID }}.web.app"
