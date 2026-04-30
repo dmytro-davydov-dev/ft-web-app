@@ -1,0 +1,166 @@
+/* ── Reports page layout ── */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.kicker {
+  font: var(--font-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-accent-primary);
+  margin-bottom: var(--space-2);
+}
+
+.title {
+  font: var(--font-heading-1);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--color-border-subtle);
+  padding-bottom: 0;
+}
+
+.tab {
+  padding: var(--space-2) var(--space-4);
+  font: var(--font-accent);
+  color: var(--color-text-secondary);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color var(--motion-fast), border-color var(--motion-fast);
+  margin-bottom: -1px;
+}
+
+.tab:hover {
+  color: var(--color-text-primary);
+}
+
+.tabActive {
+  color: var(--color-accent-primary);
+  border-bottom-color: var(--color-accent-primary);
+}
+
+/* ── Shared card ── */
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-large);
+  overflow: hidden;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.cardTitle {
+  font: var(--font-accent);
+  color: var(--color-text-primary);
+}
+
+.cardBody {
+  padding: var(--space-4);
+}
+
+/* ── Loading / Error states ── */
+.stateBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  color: var(--color-text-muted);
+  font: var(--font-body-2);
+}
+
+.errorBox {
+  color: var(--color-negative);
+}
+
+/* ── Data table ── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font: var(--font-body-2);
+}
+
+.table th {
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  font: var(--font-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  border-bottom: 1px solid var(--color-border-subtle);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.table th:hover {
+  color: var(--color-text-primary);
+}
+
+.table td {
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Sort indicator ── */
+.sortIcon {
+  display: inline-block;
+  margin-left: 4px;
+  opacity: 0.5;
+}
+
+/* ── Event badges ── */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font: var(--font-caption);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.badgeCritical {
+  background: var(--tint-negative);
+  color: var(--color-negative);
+}
+
+.badgeWarning {
+  background: var(--tint-warning);
+  color: var(--color-warning);
+}
+
+.badgeInfo {
+  background: var(--tint-accent);
+  color: var(--color-accent-primary);
+}
