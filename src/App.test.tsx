@@ -39,6 +39,11 @@ jest.mock('./pages/SitePage', () => ({
   default: () => <div>Site Page</div>,
 }));
 
+jest.mock('./pages/Reports/ReportsPage', () => ({
+  __esModule: true,
+  default: () => <div>Reports Page</div>,
+}));
+
 describe('App router', () => {
   test('renders the login route', () => {
     window.history.pushState({}, '', '/login');
