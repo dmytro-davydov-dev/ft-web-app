@@ -1,7 +1,7 @@
 /**
  * AreaOccupancyChart — R1
  * LineChart showing occupancy per area over a fixed window.
- * Data source: /v1/customers/{id}/reporting/occupancy-area
+ * Data source: /v1/customers/{id}/reporting/occupancy/area
  */
 import {
   LineChart,
@@ -20,7 +20,7 @@ import styles from './Reports.module.css';
 const LINE_COLORS = ['#00d4ff', '#7c3aed', '#4ade80', '#fbbf24', '#f87171'];
 
 export default function AreaOccupancyChart() {
-  const { data, error, isLoading } = useReport<AreaOccupancyData>('occupancy-area');
+  const { data, error, isLoading } = useReport<AreaOccupancyData>('occupancy/area');
 
   const seriesKeys = data && data.length > 0
     ? Object.keys(data[0]).filter((k) => k !== 'timestamp')

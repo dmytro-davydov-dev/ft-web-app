@@ -1,7 +1,7 @@
 /**
  * BuildingUtilisation — R3
  * AreaChart showing daily building utilisation %.
- * Data source: /v1/customers/{id}/reporting/utilisation-building
+ * Data source: /v1/customers/{id}/reporting/utilisation/building
  */
 import {
   AreaChart,
@@ -17,7 +17,7 @@ import type { UtilisationData } from './types';
 import styles from './Reports.module.css';
 
 export default function BuildingUtilisation() {
-  const { data, error, isLoading } = useReport<UtilisationData>('utilisation-building');
+  const { data, error, isLoading } = useReport<UtilisationData>('utilisation/building');
 
   return (
     <div className={styles.card}>

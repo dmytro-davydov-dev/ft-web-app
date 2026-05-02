@@ -41,9 +41,9 @@ describe('AreaOccupancyChart', () => {
     expect(screen.getByText('Area Occupancy')).toBeInTheDocument();
   });
 
-  test('calls useReport with occupancy-area report type', () => {
+  test('calls useReport with occupancy/area report type', () => {
     mockUseReport.mockReturnValue({ data: undefined, error: undefined, isLoading: true });
     render(<AreaOccupancyChart />);
-    expect(mockUseReport).toHaveBeenCalledWith('occupancy-area');
+    expect(mockUseReport).toHaveBeenCalledWith('occupancy/area');
   });
 });

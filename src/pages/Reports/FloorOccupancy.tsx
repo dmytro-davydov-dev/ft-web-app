@@ -1,7 +1,7 @@
 /**
  * FloorOccupancyChart — R2
  * Stacked BarChart showing occupancy per floor over a fixed window.
- * Data source: /v1/customers/{id}/reporting/occupancy-floor
+ * Data source: /v1/customers/{id}/reporting/occupancy/floor
  */
 import {
   BarChart,
@@ -20,7 +20,7 @@ import styles from './Reports.module.css';
 const BAR_COLORS = ['#00d4ff', '#7c3aed', '#4ade80', '#fbbf24', '#f87171'];
 
 export default function FloorOccupancyChart() {
-  const { data, error, isLoading } = useReport<FloorOccupancyData>('occupancy-floor');
+  const { data, error, isLoading } = useReport<FloorOccupancyData>('occupancy/floor');
 
   const floorKeys = data && data.length > 0
     ? Object.keys(data[0]).filter((k) => k !== 'timestamp')
