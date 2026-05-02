@@ -23,9 +23,7 @@ interface MeResponse {
   customerId: string;
 }
 
-interface ReportEnvelope {
-  count: number;
-}
+type ReportRows = unknown[];
 
 /** ISO date string for today, e.g. "2026-05-02" */
 function todayIso(): string {
@@ -38,9 +36,9 @@ export default function DashboardPage() {
 
   // KPI data — both queries keyed to today so BigQuery prunes a single partition.
   const { data: tagsData,   isLoading: tagsLoading   } =
-    useReport<ReportEnvelope>('people-day', { from: todayStr, to: todayStr });
+    useReport<ReportRows>('people-day', { from: todayStr, to: todayStr });
   const { data: alertsData, isLoading: alertsLoading } =
-    useReport<ReportEnvelope>('alerts',     { from: todayStr, to: todayStr });
+    useReport<ReportRows>('alerts',     { from: todayStr, to: todayStr });
 
   useEffect(() => {
     // Smoke-test the full auth → JWT → API chain on every dashboard load.
@@ -55,9 +53,9 @@ export default function DashboardPage() {
       });
   }, []);
 
-  const tagCount   = tagsLoading   ? '…' : String(tagsData?.count   ?? '—');
-  const alertCount = alertsLoading ? '…' : String(alertsData?.count ?? '—');
-  const hasAlerts  = !alertsLoading && (alertsData?.count ?? 0) > 0;
+  const tagCount   = tagsLoading   ? '…' : String(tagsData?.length   ?? '—');
+  const alertCount = alertsLoading ? '…' : String(alertsData?.length ?? '—');
+  const hasAlerts  = !alertsLoading && (alertsData?.length ?? 0) > 0;
 
   return (
     <>
