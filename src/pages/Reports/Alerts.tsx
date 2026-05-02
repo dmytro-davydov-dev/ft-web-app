@@ -1,15 +1,18 @@
 /**
  * AlertsTable — R5
- * Data table with event-type and severity badges.
+ * Data table showing geofence alert history.
  * Data source: /v1/customers/{id}/reporting/alerts
+ *
+ * BQ returns: geofenceId, tagId, event, ts
  */
 import { useReport } from '../../hooks/useReport';
-import type { AlertsData, AlertSeverity } from './types';
+import type { AlertsData } from './types';
+import type { DateParams } from './ReportsPage';
 import styles from './Reports.module.css';
 
-function severityClass(s: AlertSeverity): string {
-  if (s === 'critical') return styles.badgeCritical;
-  if (s === 'warning')  return styles.badgeWarning;
+function eventBadgeClass(event: string): string {
+  if (event === 'enter') return styles.badgeInfo;
+  if (event === 'exit')  return styles.badgeWarning;
   return styles.badgeInfo;
 }
 
@@ -24,8 +27,8 @@ function formatTimestamp(ts: string): string {
   }
 }
 
-export default function AlertsTable() {
-  const { data, error, isLoading } = useReport<AlertsData>('alerts');
+export default function AlertsTable({ dateParams }: { dateParams: DateParams }) {
+  const { data, error, isLoading } = useReport<AlertsData>('alerts', dateParams);
 
   return (
     <div className={styles.card}>
@@ -40,35 +43,27 @@ export default function AlertsTable() {
             <thead>
               <tr>
                 <th>Time</th>
-                <th>Severity</th>
                 <th>Event</th>
-                <th>Area</th>
-                <th>Person</th>
-                <th>Message</th>
+                <th>Geofence</th>
+                <th>Badge ID</th>
               </tr>
             </thead>
             <tbody>
-              {data.map((row) => (
-                <tr key={row.id}>
-                  <td style={{ whiteSpace: 'nowrap' }}>{formatTimestamp(row.timestamp)}</td>
+              {data.map((row, i) => (
+                <tr key={`${row.geofenceId}-${row.tagId}-${row.ts}-${i}`}>
+                  <td style={{ whiteSpace: 'nowrap' }}>{formatTimestamp(row.ts)}</td>
                   <td>
-                    <span className={`${styles.badge} ${severityClass(row.severity)}`}>
-                      {row.severity}
+                    <span className={`${styles.badge} ${eventBadgeClass(row.event)}`}>
+                      {row.event}
                     </span>
                   </td>
-                  <td>
-                    <span className={`${styles.badge} ${styles.badgeInfo}`}>
-                      {row.eventType}
-                    </span>
-                  </td>
-                  <td>{row.areaName}</td>
-                  <td>{row.personName ?? '—'}</td>
-                  <td>{row.message}</td>
+                  <td>{row.geofenceId}</td>
+                  <td>{row.tagId}</td>
                 </tr>
               ))}
               {data.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                  <td colSpan={4} style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
                     No alerts for this period.
                   </td>
                 </tr>

@@ -2,6 +2,9 @@
  * FloorOccupancyChart — R2
  * Stacked BarChart showing occupancy per floor over a fixed window.
  * Data source: /v1/customers/{id}/reporting/occupancy/floor
+ *
+ * BQ returns tall rows {floor, hour, tagCount}[]; we pivot to wide format
+ * {timestamp, [floor]: tagCount}[] for Recharts.
  */
 import {
   BarChart,
@@ -14,17 +17,33 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { useReport } from '../../hooks/useReport';
-import type { FloorOccupancyData } from './types';
+import type { FloorOccupancyData, FloorOccupancyChartRow } from './types';
+import type { DateParams } from './ReportsPage';
 import styles from './Reports.module.css';
 
 const BAR_COLORS = ['#00d4ff', '#7c3aed', '#4ade80', '#fbbf24', '#f87171'];
 
-export default function FloorOccupancyChart() {
-  const { data, error, isLoading } = useReport<FloorOccupancyData>('occupancy/floor');
+/** Pivot tall BQ rows into wide format for Recharts. */
+function pivotFloorRows(rows: FloorOccupancyData): { chartData: FloorOccupancyChartRow[]; floors: string[] } {
+  const map = new Map<string, FloorOccupancyChartRow>();
+  const floors = new Set<string>();
+  for (const row of rows) {
+    const floorKey = String(row.floor);
+    floors.add(floorKey);
+    if (!map.has(row.hour)) map.set(row.hour, { timestamp: row.hour });
+    (map.get(row.hour) as FloorOccupancyChartRow)[floorKey] = row.tagCount;
+  }
+  return { chartData: Array.from(map.values()), floors: Array.from(floors) };
+}
 
-  const floorKeys = data && data.length > 0
-    ? Object.keys(data[0]).filter((k) => k !== 'timestamp')
-    : [];
+export default function FloorOccupancyChart({ dateParams }: { dateParams: DateParams }) {
+  const { data, error, isLoading } = useReport<FloorOccupancyData>('occupancy/floor', dateParams);
+
+  const { chartData, floors } = data && data.length > 0
+    ? pivotFloorRows(data)
+    : { chartData: [], floors: [] };
+
+  const floorKeys = floors;
 
   return (
     <div className={styles.card}>
@@ -36,7 +55,7 @@ export default function FloorOccupancyChart() {
         {error   && <div className={`${styles.stateBox} ${styles.errorBox}`}>Failed to load floor occupancy data.</div>}
         {data && (
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
               <XAxis
                 dataKey="timestamp"

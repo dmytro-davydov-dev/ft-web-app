@@ -1,11 +1,14 @@
 /**
  * PeopleDayTable — R4
- * Sortable table of person-day presence records.
+ * Sortable table of tag-day presence records.
  * Data source: /v1/customers/{id}/reporting/people-day
+ *
+ * BQ returns: tagId, day, first_seen, last_seen, duration_min
  */
 import { useState } from 'react';
 import { useReport } from '../../hooks/useReport';
 import type { PeopleDayData, PeopleDayRow } from './types';
+import type { DateParams } from './ReportsPage';
 import styles from './Reports.module.css';
 
 type SortKey = keyof PeopleDayRow;
@@ -17,10 +20,10 @@ function formatDuration(minutes: number): string {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
-export default function PeopleDayTable() {
-  const { data, error, isLoading } = useReport<PeopleDayData>('people-day');
+export default function PeopleDayTable({ dateParams }: { dateParams: DateParams }) {
+  const { data, error, isLoading } = useReport<PeopleDayData>('people-day', dateParams);
 
-  const [sortKey, setSortKey] = useState<SortKey>('date');
+  const [sortKey, setSortKey] = useState<SortKey>('day');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   function handleSort(key: SortKey) {
@@ -42,10 +45,11 @@ export default function PeopleDayTable() {
     : [];
 
   const colHeaders: { key: SortKey; label: string }[] = [
-    { key: 'name',            label: 'Person'   },
-    { key: 'date',            label: 'Date'      },
-    { key: 'durationMinutes', label: 'Duration'  },
-    { key: 'primaryArea',     label: 'Area'      },
+    { key: 'tagId',        label: 'Badge ID'  },
+    { key: 'day',          label: 'Date'      },
+    { key: 'duration_min', label: 'Duration'  },
+    { key: 'first_seen',   label: 'First Seen'},
+    { key: 'last_seen',    label: 'Last Seen' },
   ];
 
   return (
@@ -72,16 +76,17 @@ export default function PeopleDayTable() {
             </thead>
             <tbody>
               {sorted.map((row) => (
-                <tr key={`${row.personId}-${row.date}`}>
-                  <td>{row.name}</td>
-                  <td>{row.date}</td>
-                  <td>{formatDuration(row.durationMinutes)}</td>
-                  <td>{row.primaryArea}</td>
+                <tr key={`${row.tagId}-${row.day}`}>
+                  <td>{row.tagId}</td>
+                  <td>{row.day}</td>
+                  <td>{formatDuration(row.duration_min)}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>{new Date(row.first_seen).toLocaleTimeString()}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>{new Date(row.last_seen).toLocaleTimeString()}</td>
                 </tr>
               ))}
               {sorted.length === 0 && (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                  <td colSpan={5} style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
                     No records for this period.
                   </td>
                 </tr>

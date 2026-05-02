@@ -18,7 +18,9 @@ async function reportFetcher([url, params]: [string, ReportParams]): Promise<unk
   const qs = entries.length ? `?${new URLSearchParams(entries).toString()}` : '';
   const res = await apiFetch(`${url}${qs}`);
   if (!res.ok) throw new Error(`Report fetch failed: ${res.status}`);
-  return res.json() as Promise<unknown>;
+  const json = await res.json() as Record<string, unknown>;
+  // Unwrap the standard API envelope { rows, customerId, reportType, ... }
+  return Array.isArray(json.rows) ? json.rows : json;
 }
 
 export function useReport<T = unknown>(reportType: string, params: ReportParams = {}) {

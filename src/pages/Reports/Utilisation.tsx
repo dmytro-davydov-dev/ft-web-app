@@ -14,10 +14,14 @@ import {
 } from 'recharts';
 import { useReport } from '../../hooks/useReport';
 import type { UtilisationData } from './types';
+import type { DateParams } from './ReportsPage';
 import styles from './Reports.module.css';
 
-export default function BuildingUtilisation() {
-  const { data, error, isLoading } = useReport<UtilisationData>('utilisation/building');
+export default function BuildingUtilisation({ dateParams }: { dateParams: DateParams }) {
+  const { data, error, isLoading } = useReport<UtilisationData>('utilisation/building', dateParams);
+
+  // BQ returns { day, utilisation_pct }; map to chart-friendly { date, utilisation }
+  const chartData = data?.map((r) => ({ date: r.day, utilisation: r.utilisation_pct })) ?? [];
 
   return (
     <div className={styles.card}>
@@ -29,7 +33,7 @@ export default function BuildingUtilisation() {
         {error   && <div className={`${styles.stateBox} ${styles.errorBox}`}>Failed to load utilisation data.</div>}
         {data && (
           <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={data} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+            <AreaChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="utilisationGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="#00d4ff" stopOpacity={0.25} />
