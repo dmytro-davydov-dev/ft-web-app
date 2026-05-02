@@ -55,7 +55,7 @@ describe('useReport', () => {
     renderHook(() => useReport('alerts'));
 
     expect(capturedKey).toEqual([
-      '/v1/customers/cust-123/reporting/alerts',
+      '/api/v1/customers/cust-123/reporting/alerts',
       {},
     ]);
   });
@@ -63,10 +63,10 @@ describe('useReport', () => {
   test('includes params in the SWR key', () => {
     mockUseAuth.mockReturnValue({ customerId: 'cust-abc' });
 
-    renderHook(() => useReport('occupancy-area', { days: 7 }));
+    renderHook(() => useReport('occupancy/area', { days: 7 }));
 
     expect(capturedKey).toEqual([
-      '/v1/customers/cust-abc/reporting/occupancy-area',
+      '/api/v1/customers/cust-abc/reporting/occupancy/area',
       { days: 7 },
     ]);
   });
@@ -80,9 +80,9 @@ describe('useReport', () => {
 
     renderHook(() => useReport('alerts'));
 
-    await capturedFetcher!(['/v1/customers/cust-123/reporting/alerts', {}]);
+    await capturedFetcher!(['/api/v1/customers/cust-123/reporting/alerts', {}]);
 
-    expect(mockApiFetch).toHaveBeenCalledWith('/v1/customers/cust-123/reporting/alerts');
+    expect(mockApiFetch).toHaveBeenCalledWith('/api/v1/customers/cust-123/reporting/alerts');
   });
 
   test('fetcher appends params as query-string', async () => {
@@ -92,12 +92,12 @@ describe('useReport', () => {
       json: () => Promise.resolve([]),
     });
 
-    renderHook(() => useReport('occupancy-floor', { days: 30 }));
+    renderHook(() => useReport('occupancy/floor', { days: 30 }));
 
-    await capturedFetcher!(['/v1/customers/cust-123/reporting/occupancy-floor', { days: 30 }]);
+    await capturedFetcher!(['/api/v1/customers/cust-123/reporting/occupancy/floor', { days: 30 }]);
 
     expect(mockApiFetch).toHaveBeenCalledWith(
-      '/v1/customers/cust-123/reporting/occupancy-floor?days=30',
+      '/api/v1/customers/cust-123/reporting/occupancy/floor?days=30',
     );
   });
 
@@ -108,7 +108,7 @@ describe('useReport', () => {
     renderHook(() => useReport('alerts'));
 
     await expect(
-      capturedFetcher!(['/v1/customers/cust-123/reporting/alerts', {}]),
+      capturedFetcher!(['/api/v1/customers/cust-123/reporting/alerts', {}]),
     ).rejects.toThrow('Report fetch failed: 403');
   });
 });

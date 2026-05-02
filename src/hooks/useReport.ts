@@ -1,7 +1,7 @@
 /**
  * useReport — SWR-backed hook for all 5 report endpoints.
  *
- * URL pattern: /v1/customers/{customerId}/reporting/{reportType}
+ * URL pattern: /api/v1/customers/{customerId}/reporting/{reportType}
  * Auth token is attached automatically by apiFetch (Firebase SDK).
  * Returns null SWR key when customerId is not yet available (pre-auth).
  */
@@ -24,7 +24,7 @@ async function reportFetcher([url, params]: [string, ReportParams]): Promise<unk
 export function useReport<T = unknown>(reportType: string, params: ReportParams = {}) {
   const { customerId } = useAuth();
   const key: SWRKey = customerId
-    ? [`/v1/customers/${customerId}/reporting/${reportType}`, params]
+    ? [`/api/v1/customers/${customerId}/reporting/${reportType}`, params]
     : null;
   return useSWR<T>(key, reportFetcher);
 }

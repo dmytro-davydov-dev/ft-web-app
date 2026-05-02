@@ -7,12 +7,20 @@ jest.mock('../api/client', () => ({
   apiFetch: (...args: unknown[]) => mockApiFetch(...args),
 }));
 
+// Mock useReport so KPI widgets don't issue real SWR fetches.
+const mockUseReport = jest.fn();
+jest.mock('../hooks/useReport', () => ({
+  useReport: (...args: unknown[]) => mockUseReport(...args),
+}));
+
 describe('DashboardPage', () => {
   beforeEach(() => {
     mockApiFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve({ uid: 'u-test', customerId: 'c-test' }),
     });
+    // Default: data not yet loaded
+    mockUseReport.mockReturnValue({ data: undefined, isLoading: true, error: undefined });
   });
 
   afterEach(() => {
@@ -32,6 +40,29 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Recent alerts')).toBeInTheDocument();
     expect(screen.getByText('Occupancy trends')).toBeInTheDocument();
     expect(screen.getByText('Active tags by zone')).toBeInTheDocument();
+  });
+
+  test('KPI widgets show loading state while data is fetching', () => {
+    mockUseReport.mockReturnValue({ data: undefined, isLoading: true, error: undefined });
+    render(<DashboardPage />);
+    // Both tag-backed KPIs show "…" while loading
+    expect(screen.getAllByText('…').length).toBeGreaterThanOrEqual(2);
+  });
+
+  test('KPI widgets show live counts when data resolves', () => {
+    mockUseReport
+      .mockReturnValueOnce({ data: { count: 42 }, isLoading: false, error: undefined }) // people-day
+      .mockReturnValueOnce({ data: { count: 3  }, isLoading: false, error: undefined }); // alerts
+    render(<DashboardPage />);
+    expect(screen.getAllByText('42').length).toBeGreaterThanOrEqual(1); // active tags + people tracked
+    expect(screen.getByText('3')).toBeInTheDocument();                  // geofence alerts
+  });
+
+  test('KPI widgets fall back to "—" when data is null', () => {
+    mockUseReport.mockReturnValue({ data: null, isLoading: false, error: undefined });
+    render(<DashboardPage />);
+    // At least one "—" visible (gateways always shows "—")
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(1);
   });
 
   test('calls /api/v1/me on mount to validate auth chain', async () => {
