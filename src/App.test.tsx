@@ -34,6 +34,11 @@ jest.mock('./pages/DashboardPage', () => ({
   default: () => <div>Dashboard Page</div>,
 }));
 
+jest.mock('./pages/SitesPage', () => ({
+  __esModule: true,
+  default: () => <div>Sites Page</div>,
+}));
+
 jest.mock('./pages/SitePage', () => ({
   __esModule: true,
   default: () => <div>Site Page</div>,

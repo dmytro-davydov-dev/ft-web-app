@@ -4,8 +4,9 @@
  * Routes:
  *   /login                    → LoginPage (public)
  *   /dashboard                → DashboardPage (auth-gated)
+ *   /dashboard/sites          → SitesPage (auth-gated, Phase 4)
  *   /dashboard/reports        → ReportsPage (auth-gated, lazy-loaded + code-split)
- *   /dashboard/:siteId        → SitePage (auth-gated, Phase 2 stub)
+ *   /dashboard/:siteId        → SitePage (auth-gated, individual site detail stub)
  *   /*                        → redirect to /login
  */
 import { lazy, Suspense } from 'react';
@@ -15,6 +16,7 @@ import ProtectedRoute     from './components/ProtectedRoute';
 import AppShell           from './components/AppShell';
 import LoginPage          from './pages/LoginPage';
 import DashboardPage      from './pages/DashboardPage';
+import SitesPage          from './pages/SitesPage';
 import SitePage           from './pages/SitePage';
 
 // Lazy-load ReportsPage so Recharts is code-split into its own chunk.
@@ -38,6 +40,8 @@ export default function App() {
             }
           >
             <Route index element={<DashboardPage />} />
+            {/* Named routes must come before the :siteId catch-all */}
+            <Route path="sites" element={<SitesPage />} />
             <Route
               path="reports"
               element={
