@@ -1,16 +1,16 @@
 /**
  * SitesPage — /dashboard/sites
- *
- * Lists all sites for the tenant.  For each site shows a per-floor breakdown
- * with zone count and gateway count.  Tag-count per zone is Phase 5+ once
- * the Firestore presence feed is wired; shown as "—" until then.
- *
- * Data: GET /api/v1/customers/{customerId}/sites  (useSites hook, SWR)
+ * Rewritten with MUI Card, Tabs, Table, LinearProgress.
  */
 import { useState }              from 'react';
 import { useSites }              from '../hooks/useSites';
 import type { Site, SiteFloor } from '../hooks/useSites';
-import styles                    from './SitesPage.module.css';
+
+import {
+  Box, Card, CardContent, CardHeader, Typography,
+  Tabs, Tab, Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
+  LinearProgress, Chip, Alert, CircularProgress, SvgIcon, Divider,
+} from '@mui/material';
 
 export default function SitesPage() {
   const { data: sites, isLoading, error } = useSites();
@@ -20,16 +20,20 @@ export default function SitesPage() {
   if (!sites?.length) return <EmptyState />;
 
   return (
-    <div className={styles.page}>
-      <p className={styles.kicker}>Sites &amp; Floors</p>
-      <h1 className={styles.title}>Sites</h1>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <Box>
+        <Typography variant="overline" sx={{ color: 'primary.main', display: 'block', mb: 0.5 }}>
+          Sites &amp; Floors
+        </Typography>
+        <Typography variant="h1">Sites</Typography>
+      </Box>
 
-      <div className={styles.siteList}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {sites.map((site) => (
           <SiteCard key={site.id} site={site} />
         ))}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
@@ -43,39 +47,48 @@ function SiteCard({ site }: { site: Site }) {
   const totalGateways = site.floors.reduce((s, f) => s + f.gateway_count, 0);
 
   return (
-    <div className={styles.card}>
-      {/* ── Card header ── */}
-      <div className={styles.cardHeader}>
-        <div className={styles.siteInfo}>
-          <span className={styles.siteName}>{site.name}</span>
-          <span className={styles.siteMeta}>
-            {site.floorplan.floors} floors · {totalZones} zones · {totalGateways} gateways
-          </span>
-          <span className={styles.siteDim}>
-            {site.floorplan.width_m} × {site.floorplan.height_m} m ·{' '}
-            {site.floorplan.floor_area_m2.toLocaleString()} m²/floor
-          </span>
-        </div>
+    <Card>
+      <CardHeader
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
+            <Box>
+              <Typography variant="h3" sx={{ mb: 0.25 }}>{site.name}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {site.floorplan.floors} floors · {totalZones} zones · {totalGateways} gateways
+              </Typography>
+              <Typography variant="caption" color="text.disabled">
+                {site.floorplan.width_m} × {site.floorplan.height_m} m ·{' '}
+                {site.floorplan.floor_area_m2.toLocaleString()} m²/floor
+              </Typography>
+            </Box>
 
-        {/* ── Floor tabs ── */}
-        <div className={styles.floorTabs} role="tablist" aria-label="Select floor">
-          {site.floors.map((f) => (
-            <button
-              key={f.floor}
-              role="tab"
-              aria-selected={f.floor === activeFloor}
-              className={`${styles.floorTab} ${f.floor === activeFloor ? styles.floorTabActive : ''}`}
-              onClick={() => setActiveFloor(f.floor)}
+            {/* Floor tabs */}
+            <Tabs
+              value={activeFloor}
+              onChange={(_e, val: number) => setActiveFloor(val)}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{ minHeight: 36, '& .MuiTabs-indicator': { height: 2 } }}
             >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
+              {site.floors.map((f) => (
+                <Tab
+                  key={f.floor}
+                  value={f.floor}
+                  label={f.label}
+                  sx={{ minHeight: 36, py: 0.5, px: 2, fontSize: '0.8125rem' }}
+                />
+              ))}
+            </Tabs>
+          </Box>
+        }
+        disableTypography
+        sx={{ pb: 1 }}
+      />
 
-      {/* ── Floor detail ── */}
+      <Divider />
+
       {currentFloor && <FloorPanel floor={currentFloor} />}
-    </div>
+    </Card>
   );
 }
 
@@ -83,46 +96,72 @@ function SiteCard({ site }: { site: Site }) {
 
 function FloorPanel({ floor }: { floor: SiteFloor }) {
   return (
-    <div className={styles.floorPanel} role="tabpanel">
-      <div className={styles.floorMeta}>
-        <span className={styles.floorMetaItem}>
-          <IconGateway />
-          {floor.gateway_count} gateways
-        </span>
-        <span className={styles.floorMetaItem}>
-          <IconZone />
-          {floor.zones.length} zones
-        </span>
-      </div>
+    <CardContent>
+      {/* Floor meta */}
+      <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <SvgIcon sx={{ width: 16, height: 16, color: 'text.secondary' }}>
+            <IconGateway />
+          </SvgIcon>
+          <Typography variant="body2" color="text.secondary">
+            {floor.gateway_count} gateways
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <SvgIcon sx={{ width: 16, height: 16, color: 'text.secondary' }}>
+            <IconZone />
+          </SvgIcon>
+          <Typography variant="body2" color="text.secondary">
+            {floor.zones.length} zones
+          </Typography>
+        </Box>
+      </Box>
 
-      <table className={styles.zoneTable}>
-        <thead>
-          <tr>
-            <th>Zone</th>
-            <th className={styles.thNum}>Area (m²)</th>
-            <th className={styles.thNum}>Active tags</th>
-            <th>Occupancy</th>
-          </tr>
-        </thead>
-        <tbody>
-          {floor.zones.map((zone) => (
-            <tr key={zone.id} className={styles.zoneRow}>
-              <td className={styles.zoneLabel}>{zone.label}</td>
-              <td className={styles.tdNum}>{zone.area_m2.toLocaleString()}</td>
-              <td className={styles.tdNum}>—</td>
-              <td>
-                <div className={styles.barWrap} title="Live data in Phase 5">
-                  <div className={styles.barTrack}>
-                    <div className={styles.barFill} style={{ width: '0%' }} />
-                  </div>
-                  <span className={styles.barLabel}>Phase 5</span>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+      {/* Zone table */}
+      <TableContainer>
+        <Table size="small">
+          <TableHead>
+            <TableRow>
+              <TableCell>Zone</TableCell>
+              <TableCell align="right">Area (m²)</TableCell>
+              <TableCell align="right">Active tags</TableCell>
+              <TableCell sx={{ minWidth: 160 }}>Occupancy</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {floor.zones.map((zone) => (
+              <TableRow key={zone.id}>
+                <TableCell sx={{ color: 'text.primary', fontWeight: 500 }}>
+                  {zone.label}
+                </TableCell>
+                <TableCell align="right">{zone.area_m2.toLocaleString()}</TableCell>
+                <TableCell align="right">—</TableCell>
+                <TableCell>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={0}
+                      sx={{
+                        flex: 1,
+                        height: 6,
+                        borderRadius: 3,
+                        bgcolor: 'rgba(255,255,255,0.06)',
+                        '& .MuiLinearProgress-bar': { bgcolor: 'primary.main' },
+                      }}
+                    />
+                    <Chip
+                      label="Phase 5"
+                      size="small"
+                      sx={{ height: 18, fontSize: '0.6875rem', bgcolor: 'rgba(255,255,255,0.06)', color: 'text.disabled' }}
+                    />
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </CardContent>
   );
 }
 
@@ -130,55 +169,62 @@ function FloorPanel({ floor }: { floor: SiteFloor }) {
 
 function LoadingState() {
   return (
-    <div className={styles.page}>
-      <p className={styles.kicker}>Sites &amp; Floors</p>
-      <h1 className={styles.title}>Sites</h1>
-      <div className={styles.feedback}>Loading site config…</div>
-    </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <PageHeading />
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 8 }}>
+        <CircularProgress />
+        <Typography variant="body2" color="text.secondary">Loading site config…</Typography>
+      </Box>
+    </Box>
   );
 }
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <div className={styles.page}>
-      <p className={styles.kicker}>Sites &amp; Floors</p>
-      <h1 className={styles.title}>Sites</h1>
-      <div className={`${styles.feedback} ${styles.feedbackError}`}>
-        Could not load sites: {message}
-      </div>
-    </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <PageHeading />
+      <Alert severity="error">Could not load sites: {message}</Alert>
+    </Box>
   );
 }
 
 function EmptyState() {
   return (
-    <div className={styles.page}>
-      <p className={styles.kicker}>Sites &amp; Floors</p>
-      <h1 className={styles.title}>Sites</h1>
-      <div className={styles.feedback}>No sites configured for this tenant.</div>
-    </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <PageHeading />
+      <Typography color="text.secondary">No sites configured for this tenant.</Typography>
+    </Box>
   );
 }
 
-// ── Inline icons ──────────────────────────────────────────────────────────────
+function PageHeading() {
+  return (
+    <Box>
+      <Typography variant="overline" sx={{ color: 'primary.main', display: 'block', mb: 0.5 }}>
+        Sites &amp; Floors
+      </Typography>
+      <Typography variant="h1">Sites</Typography>
+    </Box>
+  );
+}
 
+// ── SVG Icons ─────────────────────────────────────────────────────────────────
 function IconGateway() {
   return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-      <path d="M2 8a6 6 0 0112 0" />
-      <path d="M4.5 8a3.5 3.5 0 017 0" />
-      <circle cx="8" cy="8" r="1" fill="currentColor" stroke="none" />
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M2 8a6 6 0 0112 0"/>
+      <path d="M4.5 8a3.5 3.5 0 017 0"/>
+      <circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/>
     </svg>
   );
 }
-
 function IconZone() {
   return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-      <rect x="2" y="2" width="5" height="5" rx="1" />
-      <rect x="9" y="2" width="5" height="5" rx="1" />
-      <rect x="2" y="9" width="5" height="5" rx="1" />
-      <rect x="9" y="9" width="5" height="5" rx="1" />
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="2" y="2" width="5" height="5" rx="1"/>
+      <rect x="9" y="2" width="5" height="5" rx="1"/>
+      <rect x="2" y="9" width="5" height="5" rx="1"/>
+      <rect x="9" y="9" width="5" height="5" rx="1"/>
     </svg>
   );
 }

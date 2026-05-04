@@ -39,6 +39,6 @@ describe('FloorOccupancyChart', () => {
   test('calls useReport with occupancy/floor report type', () => {
     mockUseReport.mockReturnValue({ data: undefined, error: undefined, isLoading: true });
     render(<FloorOccupancyChart />);
-    expect(mockUseReport).toHaveBeenCalledWith('occupancy/floor');
+    expect(mockUseReport).toHaveBeenCalledWith('occupancy/floor', expect.any(Object));
   });
 });

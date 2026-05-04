@@ -1,29 +1,20 @@
 /**
- * FloorOccupancyChart — R2
- * Stacked BarChart showing occupancy per floor over a fixed window.
- * Data source: /v1/customers/{id}/reporting/occupancy/floor
- *
- * BQ returns tall rows {floor, hour, tagCount}[]; we pivot to wide format
- * {timestamp, [floor]: tagCount}[] for Recharts.
+ * FloorOccupancyChart — R2 — Stacked BarChart per floor.
+ * Rewritten with MUI Card; Recharts chart preserved.
  */
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useReport } from '../../hooks/useReport';
 import type { FloorOccupancyData, FloorOccupancyChartRow } from './types';
 import type { DateParams } from './ReportsPage';
-import styles from './Reports.module.css';
+import { CHART_COLORS } from '../../theme';
 
-const BAR_COLORS = ['#00d4ff', '#7c3aed', '#4ade80', '#fbbf24', '#f87171'];
+import { Card, CardContent, CardHeader, Typography, CircularProgress, Alert, Box } from '@mui/material';
 
-/** Pivot tall BQ rows into wide format for Recharts. */
+const BAR_COLORS = [
+  CHART_COLORS.cyan, CHART_COLORS.purple, CHART_COLORS.positive,
+  CHART_COLORS.warning, CHART_COLORS.negative,
+];
+
 function pivotFloorRows(rows: FloorOccupancyData): { chartData: FloorOccupancyChartRow[]; floors: string[] } {
   const map = new Map<string, FloorOccupancyChartRow>();
   const floors = new Set<string>();
@@ -36,61 +27,44 @@ function pivotFloorRows(rows: FloorOccupancyData): { chartData: FloorOccupancyCh
   return { chartData: Array.from(map.values()), floors: Array.from(floors) };
 }
 
-export default function FloorOccupancyChart({ dateParams }: { dateParams: DateParams }) {
+export default function FloorOccupancyChart({ dateParams = { from: '', to: '' } }: { dateParams?: DateParams }) {
   const { data, error, isLoading } = useReport<FloorOccupancyData>('occupancy/floor', dateParams);
-
-  const { chartData, floors } = data && data.length > 0
-    ? pivotFloorRows(data)
-    : { chartData: [], floors: [] };
-
-  const floorKeys = floors;
+  const { chartData, floors } = data?.length ? pivotFloorRows(data) : { chartData: [], floors: [] };
 
   return (
-    <div className={styles.card}>
-      <div className={styles.cardHeader}>
-        <span className={styles.cardTitle}>Floor Occupancy</span>
-      </div>
-      <div className={styles.cardBody}>
-        {isLoading && <div className={styles.stateBox}>Loading…</div>}
-        {error   && <div className={`${styles.stateBox} ${styles.errorBox}`}>Failed to load floor occupancy data.</div>}
+    <Card>
+      <CardHeader
+        title={<Typography variant="body1" sx={{ fontWeight: 700 }}>Floor Occupancy</Typography>}
+        disableTypography
+      />
+      <CardContent>
+        {isLoading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+            <CircularProgress size={28} />
+          </Box>
+        )}
+        {error && <Alert severity="error">Failed to load floor occupancy data.</Alert>}
         {data && (
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-              <XAxis
-                dataKey="timestamp"
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                width={32}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: '#0f1629',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: 8,
-                  fontSize: 12,
-                }}
-              />
-              <Legend wrapperStyle={{ fontSize: 12, color: '#94a3b8' }} />
-              {floorKeys.map((key, i) => (
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.borderSubtle} />
+              <XAxis dataKey="timestamp" tick={{ fill: CHART_COLORS.textSecondary, fontSize: 11 }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: CHART_COLORS.textSecondary, fontSize: 11 }} tickLine={false} axisLine={false} width={32} />
+              <Tooltip contentStyle={{ background: CHART_COLORS.bgCard, border: `1px solid ${CHART_COLORS.borderSubtle}`, borderRadius: 8, fontSize: 12 }} />
+              <Legend wrapperStyle={{ fontSize: 12, color: CHART_COLORS.textSecondary }} />
+              {floors.map((key, i) => (
                 <Bar
                   key={key}
                   dataKey={key}
                   stackId="floors"
                   fill={BAR_COLORS[i % BAR_COLORS.length]}
-                  radius={i === floorKeys.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                  radius={i === floors.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
                 />
               ))}
             </BarChart>
           </ResponsiveContainer>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

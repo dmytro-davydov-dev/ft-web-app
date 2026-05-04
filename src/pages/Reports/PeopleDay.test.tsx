@@ -1,16 +1,18 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PeopleDayTable from './PeopleDay';
+import type { PeopleDayRow } from './types';
 
 const mockUseReport = jest.fn();
 jest.mock('../../hooks/useReport', () => ({
   useReport: (...args: unknown[]) => mockUseReport(...args),
 }));
 
-const SAMPLE_DATA = [
-  { personId: 'p1', name: 'Alice',   date: '2026-04-02', durationMinutes: 480, primaryArea: 'Lab A'   },
-  { personId: 'p2', name: 'Bob',     date: '2026-04-01', durationMinutes: 300, primaryArea: 'Lab B'   },
-  { personId: 'p3', name: 'Charlie', date: '2026-04-03', durationMinutes: 120, primaryArea: 'Lounge'  },
+// Data matching PeopleDayRow — field names mirror BigQuery column names
+const SAMPLE_DATA: PeopleDayRow[] = [
+  { tagId: 'tag-001', day: '2026-04-02', duration_min: 480, first_seen: '2026-04-02T08:00:00Z', last_seen: '2026-04-02T16:00:00Z' },
+  { tagId: 'tag-002', day: '2026-04-01', duration_min: 300, first_seen: '2026-04-01T09:00:00Z', last_seen: '2026-04-01T14:00:00Z' },
+  { tagId: 'tag-003', day: '2026-04-03', duration_min: 120, first_seen: '2026-04-03T10:00:00Z', last_seen: '2026-04-03T12:00:00Z' },
 ];
 
 describe('PeopleDayTable', () => {
@@ -19,7 +21,7 @@ describe('PeopleDayTable', () => {
   test('shows loading state', () => {
     mockUseReport.mockReturnValue({ data: undefined, error: undefined, isLoading: true });
     render(<PeopleDayTable />);
-    expect(screen.getByText('Loading…')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
   test('shows error state', () => {
@@ -31,9 +33,9 @@ describe('PeopleDayTable', () => {
   test('renders all rows', () => {
     mockUseReport.mockReturnValue({ data: SAMPLE_DATA, error: undefined, isLoading: false });
     render(<PeopleDayTable />);
-    expect(screen.getByText('Alice')).toBeInTheDocument();
-    expect(screen.getByText('Bob')).toBeInTheDocument();
-    expect(screen.getByText('Charlie')).toBeInTheDocument();
+    expect(screen.getByText('tag-001')).toBeInTheDocument();
+    expect(screen.getByText('tag-002')).toBeInTheDocument();
+    expect(screen.getByText('tag-003')).toBeInTheDocument();
   });
 
   test('formats duration correctly', () => {
@@ -44,18 +46,19 @@ describe('PeopleDayTable', () => {
     expect(screen.getByText('2h 0m')).toBeInTheDocument();  // 120 min
   });
 
-  test('sorts by name ascending on header click', async () => {
+  test('sorts by tagId ascending on header click', async () => {
     mockUseReport.mockReturnValue({ data: SAMPLE_DATA, error: undefined, isLoading: false });
     render(<PeopleDayTable />);
 
-    await userEvent.click(screen.getByText(/Person/));
+    // Click the Badge ID header to sort ascending
+    await userEvent.click(screen.getByText('Badge ID'));
 
     const cells = screen.getAllByRole('cell').filter((c) =>
-      ['Alice', 'Bob', 'Charlie'].includes(c.textContent ?? ''),
+      ['tag-001', 'tag-002', 'tag-003'].includes(c.textContent ?? ''),
     );
-    expect(cells[0].textContent).toBe('Alice');
-    expect(cells[1].textContent).toBe('Bob');
-    expect(cells[2].textContent).toBe('Charlie');
+    expect(cells[0].textContent).toBe('tag-001');
+    expect(cells[1].textContent).toBe('tag-002');
+    expect(cells[2].textContent).toBe('tag-003');
   });
 
   test('shows empty state when data is empty array', () => {
@@ -67,6 +70,6 @@ describe('PeopleDayTable', () => {
   test('calls useReport with people-day report type', () => {
     mockUseReport.mockReturnValue({ data: undefined, error: undefined, isLoading: true });
     render(<PeopleDayTable />);
-    expect(mockUseReport).toHaveBeenCalledWith('people-day');
+    expect(mockUseReport).toHaveBeenCalledWith('people-day', expect.any(Object));
   });
 });

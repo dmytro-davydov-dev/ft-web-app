@@ -1,77 +1,79 @@
 /**
- * AlertsTable — R5
- * Data table showing geofence alert history.
- * Data source: /v1/customers/{id}/reporting/alerts
- *
- * BQ returns: geofenceId, tagId, event, ts
+ * AlertsTable — R5 — geofence alert history.
+ * Rewritten with MUI Table + Chip.
  */
 import { useReport } from '../../hooks/useReport';
 import type { AlertsData } from './types';
 import type { DateParams } from './ReportsPage';
-import styles from './Reports.module.css';
 
-function eventBadgeClass(event: string): string {
-  if (event === 'enter') return styles.badgeInfo;
-  if (event === 'exit')  return styles.badgeWarning;
-  return styles.badgeInfo;
-}
+import {
+  Card, CardHeader, Typography, CircularProgress, Alert, Box,
+  Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Chip,
+} from '@mui/material';
 
 function formatTimestamp(ts: string): string {
   try {
-    return new Date(ts).toLocaleString(undefined, {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    });
-  } catch {
-    return ts;
-  }
+    return new Date(ts).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
+  } catch { return ts; }
 }
 
-export default function AlertsTable({ dateParams }: { dateParams: DateParams }) {
+function eventChipProps(event: string): { label: string; color: 'info' | 'warning' } {
+  return event === 'exit'
+    ? { label: 'exit',  color: 'warning' }
+    : { label: event,   color: 'info'    };
+}
+
+export default function AlertsTable({ dateParams = { from: '', to: '' } }: { dateParams?: DateParams }) {
   const { data, error, isLoading } = useReport<AlertsData>('alerts', dateParams);
 
   return (
-    <div className={styles.card}>
-      <div className={styles.cardHeader}>
-        <span className={styles.cardTitle}>Alerts</span>
-      </div>
-      <div className={styles.cardBody} style={{ padding: 0 }}>
-        {isLoading && <div className={styles.stateBox}>Loading…</div>}
-        {error   && <div className={`${styles.stateBox} ${styles.errorBox}`}>Failed to load alerts data.</div>}
-        {data && (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Event</th>
-                <th>Geofence</th>
-                <th>Badge ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((row, i) => (
-                <tr key={`${row.geofenceId}-${row.tagId}-${row.ts}-${i}`}>
-                  <td style={{ whiteSpace: 'nowrap' }}>{formatTimestamp(row.ts)}</td>
-                  <td>
-                    <span className={`${styles.badge} ${eventBadgeClass(row.event)}`}>
-                      {row.event}
-                    </span>
-                  </td>
-                  <td>{row.geofenceId}</td>
-                  <td>{row.tagId}</td>
-                </tr>
-              ))}
+    <Card>
+      <CardHeader
+        title={<Typography variant="body1" sx={{ fontWeight: 700 }}>Alerts</Typography>}
+        disableTypography
+      />
+      {isLoading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+          <CircularProgress size={28} />
+        </Box>
+      )}
+      {error && <Box sx={{ p: 2 }}><Alert severity="error">Failed to load alerts data.</Alert></Box>}
+      {data && (
+        <TableContainer>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Time</TableCell>
+                <TableCell>Event</TableCell>
+                <TableCell>Geofence</TableCell>
+                <TableCell>Badge ID</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {data.map((row, i) => {
+                const { label, color } = eventChipProps(row.event);
+                return (
+                  <TableRow key={`${row.geofenceId}-${row.tagId}-${row.ts}-${i}`}>
+                    <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatTimestamp(row.ts)}</TableCell>
+                    <TableCell>
+                      <Chip label={label} color={color} size="small" variant="outlined" />
+                    </TableCell>
+                    <TableCell>{row.geofenceId}</TableCell>
+                    <TableCell>{row.tagId}</TableCell>
+                  </TableRow>
+                );
+              })}
               {data.length === 0 && (
-                <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', color: 'var(--color-text-muted)' }}>
+                <TableRow>
+                  <TableCell colSpan={4} align="center" sx={{ py: 4, color: 'text.disabled' }}>
                     No alerts for this period.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </Card>
   );
 }

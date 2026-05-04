@@ -1,11 +1,12 @@
 /**
  * LoginPage — email + password sign-in via Firebase Auth.
- * Redirects to /dashboard on success.
+ * Rewritten with MUI components.
  */
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import styles from './LoginPage.module.css';
+
+import { Box, Paper, Typography, TextField, Button, Alert } from '@mui/material';
 
 export default function LoginPage() {
   const { user, loading, signIn } = useAuth();
@@ -16,7 +17,6 @@ export default function LoginPage() {
   const [error,    setError]    = useState('');
   const [busy,     setBusy]     = useState(false);
 
-  // Already signed in → go straight to dashboard
   if (!loading && user) return <Navigate to="/dashboard" replace />;
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -35,51 +35,101 @@ export default function LoginPage() {
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.card}>
-        <div className={styles.logo}>
-          <div className={styles.logoMark} />
-          <span className={styles.logoName}>Flowterra</span>
-        </div>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'background.default',
+        p: 2,
+      }}
+    >
+      <Paper
+        elevation={0}
+        sx={{
+          width: '100%',
+          maxWidth: 400,
+          borderRadius: 3,
+          p: { xs: 4, sm: 6 },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 3,
+        }}
+      >
+        {/* Logo */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box
+            sx={{
+              width: 32,
+              height: 32,
+              borderRadius: '4px',
+              background: 'linear-gradient(135deg, #00d4ff, #7c3aed)',
+              flexShrink: 0,
+            }}
+          />
+          <Typography sx={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '-0.01em' }}>
+            Flowterra
+          </Typography>
+        </Box>
 
-        <h1 className={styles.heading}>Sign in</h1>
-        <p className={styles.sub}>Real-time location intelligence</p>
+        {/* Heading */}
+        <Box>
+          <Typography variant="h1" sx={{ fontSize: '2rem', letterSpacing: '-0.01em', mb: 0.5 }}>
+            Sign in
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Real-time location intelligence
+          </Typography>
+        </Box>
 
-        <form onSubmit={handleSubmit} className={styles.form}>
-          <label className={styles.label}>
-            Email
-            <input
-              type="email"
-              className={styles.input}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              autoComplete="email"
-            />
-          </label>
+        {/* Form */}
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+        >
+          <TextField
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+            autoComplete="email"
+            fullWidth
+          />
 
-          <label className={styles.label}>
-            Password
-            <input
-              type="password"
-              className={styles.input}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              autoComplete="current-password"
-            />
-          </label>
+          <TextField
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+            autoComplete="current-password"
+            fullWidth
+          />
 
-          {error && <p className={styles.error}>{error}</p>}
+          {error && (
+            <Alert severity="error" sx={{ py: 0.5 }}>
+              {error}
+            </Alert>
+          )}
 
-          <button type="submit" className={styles.submit} disabled={busy}>
+          <Button
+            type="submit"
+            variant="contained"
+            size="large"
+            disabled={busy}
+            fullWidth
+            sx={{ mt: 1, height: 44 }}
+          >
             {busy ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
-      </div>
-    </div>
+          </Button>
+        </Box>
+      </Paper>
+    </Box>
   );
 }
 

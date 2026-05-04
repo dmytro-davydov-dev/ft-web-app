@@ -11,6 +11,7 @@
  */
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Box, CircularProgress } from '@mui/material';
 import { AuthProvider }   from './context/AuthContext';
 import ProtectedRoute     from './components/ProtectedRoute';
 import AppShell           from './components/AppShell';
@@ -21,6 +22,14 @@ import SitePage           from './pages/SitePage';
 
 // Lazy-load ReportsPage so Recharts is code-split into its own chunk.
 const ReportsPage = lazy(() => import('./pages/Reports/ReportsPage'));
+
+function ReportsFallback() {
+  return (
+    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', p: 6 }}>
+      <CircularProgress size={32} />
+    </Box>
+  );
+}
 
 export default function App() {
   return (
@@ -45,7 +54,7 @@ export default function App() {
             <Route
               path="reports"
               element={
-                <Suspense fallback={<div style={{ padding: '2rem', color: 'var(--color-text-muted)' }}>Loading reports…</div>}>
+                <Suspense fallback={<ReportsFallback />}>
                   <ReportsPage />
                 </Suspense>
               }

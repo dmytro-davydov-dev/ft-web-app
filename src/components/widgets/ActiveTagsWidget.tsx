@@ -1,14 +1,12 @@
 /**
  * ActiveTagsWidget — active tags bar chart placeholder (Phase 2).
- * Recharts <BarChart> imported and stubbed; will be wired in Phase 5.
+ * Rewritten with MUI Card; Recharts chart preserved.
  */
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import styles from './ChartWidget.module.css';
+import { Card, CardContent, CardHeader, Chip, Typography, Box } from '@mui/material';
+import { CHART_COLORS } from '../../theme';
 
-interface StubPoint {
-  zone: string;
-  tags: number;
-}
+interface StubPoint { zone: string; tags: number; }
 
 const STUB_DATA: StubPoint[] = [
   { zone: 'A', tags: 0 }, { zone: 'B', tags: 0 },
@@ -18,27 +16,39 @@ const STUB_DATA: StubPoint[] = [
 
 export default function ActiveTagsWidget() {
   return (
-    <div className={styles.card}>
-      <div className={styles.header}>
-        <span className={styles.title}>Active tags by zone</span>
-        <span className={styles.badge}>Phase 5</span>
-      </div>
-      <div className={styles.body}>
-        <p className={styles.note}>Data coming in Phase 4 — live tag counts per zone.</p>
+    <Card sx={{ flex: 1 }}>
+      <CardHeader
+        title={
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Typography variant="body1" sx={{ fontWeight: 700 }}>Active tags by zone</Typography>
+            <Chip
+              label="Phase 5"
+              size="small"
+              sx={{ bgcolor: 'rgba(0,212,255,0.10)', color: '#00d4ff', fontWeight: 600 }}
+            />
+          </Box>
+        }
+        disableTypography
+        sx={{ pb: 1 }}
+      />
+      <CardContent sx={{ pt: 0 }}>
+        <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1.5 }}>
+          Data coming in Phase 4 — live tag counts per zone.
+        </Typography>
         <ResponsiveContainer width="100%" height={180}>
           <BarChart data={STUB_DATA} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-            <XAxis dataKey="zone" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_COLORS.borderSubtle} />
+            <XAxis dataKey="zone" tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fill: CHART_COLORS.textMuted, fontSize: 11 }} axisLine={false} tickLine={false} />
             <Tooltip
-              contentStyle={{ background: '#0f1629', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8 }}
-              labelStyle={{ color: '#94a3b8' }}
-              itemStyle={{ color: '#7c3aed' }}
+              contentStyle={{ background: CHART_COLORS.bgCard, border: `1px solid ${CHART_COLORS.borderSubtle}`, borderRadius: 8 }}
+              labelStyle={{ color: CHART_COLORS.textSecondary }}
+              itemStyle={{ color: CHART_COLORS.purple }}
             />
-            <Bar dataKey="tags" fill="#7c3aed" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="tags" fill={CHART_COLORS.purple} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

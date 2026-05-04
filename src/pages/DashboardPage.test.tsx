@@ -50,9 +50,10 @@ describe('DashboardPage', () => {
   });
 
   test('KPI widgets show live counts when data resolves', () => {
+    // Component uses data.length — pass arrays of the correct size
     mockUseReport
-      .mockReturnValueOnce({ data: { count: 42 }, isLoading: false, error: undefined }) // people-day
-      .mockReturnValueOnce({ data: { count: 3  }, isLoading: false, error: undefined }); // alerts
+      .mockReturnValueOnce({ data: Array(42).fill({}), isLoading: false, error: undefined }) // people-day
+      .mockReturnValueOnce({ data: Array(3).fill({}),  isLoading: false, error: undefined }); // alerts
     render(<DashboardPage />);
     expect(screen.getAllByText('42').length).toBeGreaterThanOrEqual(1); // active tags + people tracked
     expect(screen.getByText('3')).toBeInTheDocument();                  // geofence alerts

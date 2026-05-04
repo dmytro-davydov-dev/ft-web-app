@@ -40,6 +40,6 @@ describe('BuildingUtilisation', () => {
   test('calls useReport with utilisation/building report type', () => {
     mockUseReport.mockReturnValue({ data: undefined, error: undefined, isLoading: true });
     render(<BuildingUtilisation />);
-    expect(mockUseReport).toHaveBeenCalledWith('utilisation/building');
+    expect(mockUseReport).toHaveBeenCalledWith('utilisation/building', expect.any(Object));
   });
 });
