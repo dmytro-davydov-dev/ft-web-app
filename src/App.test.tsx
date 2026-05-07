@@ -44,6 +44,26 @@ jest.mock('./pages/SitePage', () => ({
   default: () => <div>Site Page</div>,
 }));
 
+jest.mock('./pages/PeoplePage', () => ({
+  __esModule: true,
+  default: () => <div>People Page</div>,
+}));
+
+jest.mock('./pages/EventsStreamPage', () => ({
+  __esModule: true,
+  default: () => <div>Events Stream Page</div>,
+}));
+
+jest.mock('./pages/GeofencesPage', () => ({
+  __esModule: true,
+  default: () => <div>Geofences Page</div>,
+}));
+
+jest.mock('./pages/TagsPage', () => ({
+  __esModule: true,
+  default: () => <div>Tags Page</div>,
+}));
+
 jest.mock('./pages/Reports/ReportsPage', () => ({
   __esModule: true,
   default: () => <div>Reports Page</div>,

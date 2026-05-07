@@ -16,15 +16,14 @@ import { useAuth }  from '../context/AuthContext';
 // ── Domain types ─────────────────────────────────────────────────────────────
 
 export interface LocationEvent {
-  event_ts:    string;       // ISO 8601 timestamp
+  event_ts:    string;       // ISO 8601 timestamp (partition key)
+  ingested_at: string;       // ISO 8601 timestamp (when ingest-fn processed)
   tag_id:      string;
   gateway_id:  string | null;
   area_id:     string | null;
-  zone_id:     string | null;
   floor:       number | null;
   site_id:     string | null;
-  rssi:        number | null;
-  battery_pct: number | null;
+  rssi:        number;       // dBm — REQUIRED in BQ schema
 }
 
 export interface EventsResponse {

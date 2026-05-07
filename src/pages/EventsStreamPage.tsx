@@ -68,8 +68,7 @@ function formatTs(ts: string): string {
   }
 }
 
-function RssiBadge({ rssi }: { rssi: number | null }) {
-  if (rssi === null) return <Typography variant="body2" color="text.disabled">—</Typography>;
+function RssiBadge({ rssi }: { rssi: number }) {
   const color = rssi >= -65 ? 'success' : rssi >= -80 ? 'warning' : 'error';
   return (
     <Chip
@@ -80,11 +79,6 @@ function RssiBadge({ rssi }: { rssi: number | null }) {
       sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}
     />
   );
-}
-
-function BatteryCell({ pct }: { pct: number | null }) {
-  if (pct === null) return <Typography variant="body2" color="text.disabled">—</Typography>;
-  return <Typography variant="body2">{pct}%</Typography>;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -216,10 +210,9 @@ export default function EventsStreamPage() {
                   <TableCell sx={{ whiteSpace: 'nowrap' }}>Time</TableCell>
                   <TableCell>Tag ID</TableCell>
                   <TableCell>Gateway</TableCell>
-                  <TableCell>Area / Zone</TableCell>
+                  <TableCell>Area</TableCell>
                   <TableCell align="right">Floor</TableCell>
                   <TableCell align="right">RSSI</TableCell>
-                  <TableCell align="right">Battery</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -239,7 +232,7 @@ export default function EventsStreamPage() {
                       {row.gateway_id ?? '—'}
                     </TableCell>
                     <TableCell sx={{ fontSize: '0.875rem' }}>
-                      {row.area_id ?? row.zone_id ?? '—'}
+                      {row.area_id ?? '—'}
                     </TableCell>
                     <TableCell align="right" sx={{ color: 'text.secondary' }}>
                       {row.floor !== null ? row.floor : '—'}
@@ -247,15 +240,12 @@ export default function EventsStreamPage() {
                     <TableCell align="right">
                       <RssiBadge rssi={row.rssi} />
                     </TableCell>
-                    <TableCell align="right">
-                      <BatteryCell pct={row.battery_pct} />
-                    </TableCell>
                   </TableRow>
                 ))}
 
                 {rows.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={7} align="center" sx={{ py: 6, color: 'text.disabled' }}>
+                    <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.disabled' }}>
                       No events for this period.
                     </TableCell>
                   </TableRow>

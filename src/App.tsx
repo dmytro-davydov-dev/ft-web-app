@@ -6,6 +6,9 @@
  *   /dashboard                → DashboardPage (auth-gated)
  *   /dashboard/sites          → SitesPage (auth-gated, Phase 4)
  *   /dashboard/events         → EventsStreamPage (auth-gated, live BQ polling)
+ *   /dashboard/geofences      → GeofencesPage (auth-gated, config + alert history)
+ *   /dashboard/people         → PeoplePage (auth-gated, people-day report)
+ *   /dashboard/tags           → TagsPage (auth-gated, BLE tag registry)
  *   /dashboard/reports        → ReportsPage (auth-gated, lazy-loaded + code-split)
  *   /dashboard/:siteId        → SitePage (auth-gated, individual site detail stub)
  *   /*                        → redirect to /login
@@ -20,7 +23,10 @@ import LoginPage             from './pages/LoginPage';
 import DashboardPage         from './pages/DashboardPage';
 import SitesPage             from './pages/SitesPage';
 import SitePage              from './pages/SitePage';
+import PeoplePage            from './pages/PeoplePage';
 import EventsStreamPage      from './pages/EventsStreamPage';
+import GeofencesPage         from './pages/GeofencesPage';
+import TagsPage              from './pages/TagsPage';
 
 // Lazy-load ReportsPage so Recharts is code-split into its own chunk.
 const ReportsPage = lazy(() => import('./pages/Reports/ReportsPage'));
@@ -52,8 +58,11 @@ export default function App() {
           >
             <Route index element={<DashboardPage />} />
             {/* Named routes must come before the :siteId catch-all */}
-            <Route path="sites"   element={<SitesPage />} />
-            <Route path="events"  element={<EventsStreamPage />} />
+            <Route path="sites"      element={<SitesPage />} />
+            <Route path="events"     element={<EventsStreamPage />} />
+            <Route path="geofences"  element={<GeofencesPage />} />
+            <Route path="people"     element={<PeoplePage />} />
+            <Route path="tags"       element={<TagsPage />} />
             <Route
               path="reports"
               element={

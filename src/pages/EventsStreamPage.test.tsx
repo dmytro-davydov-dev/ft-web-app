@@ -27,25 +27,23 @@ function renderPage() {
 const MOCK_ROWS: LocationEvent[] = [
   {
     event_ts:    '2026-05-05T10:01:00+00:00',
+    ingested_at: '2026-05-05T10:01:01+00:00',
     tag_id:      'tag-001',
     gateway_id:  'gw-floor1-a',
     area_id:     'zone-open-plan',
-    zone_id:     'zone-open-plan',
     floor:       1,
     site_id:     'site-hq-pilot',
     rssi:        -65,
-    battery_pct: 82,
   },
   {
     event_ts:    '2026-05-05T10:00:00+00:00',
+    ingested_at: '2026-05-05T10:00:01+00:00',
     tag_id:      'tag-002',
     gateway_id:  null,
     area_id:     null,
-    zone_id:     null,
     floor:       null,
     site_id:     'site-hq-pilot',
     rssi:        -90,
-    battery_pct: null,
   },
 ];
 
@@ -110,7 +108,7 @@ describe('EventsStreamPage', () => {
     expect(screen.getByText('Tag ID')).toBeInTheDocument();
     expect(screen.getByText('Gateway')).toBeInTheDocument();
     expect(screen.getByText('RSSI')).toBeInTheDocument();
-    expect(screen.getByText('Battery')).toBeInTheDocument();
+    expect(screen.queryByText('Battery')).not.toBeInTheDocument();
   });
 
   test('renders a row for each event', () => {
@@ -138,10 +136,10 @@ describe('EventsStreamPage', () => {
     expect(screen.getByText('-65 dBm')).toBeInTheDocument();
   });
 
-  test('shows battery percentage when present', () => {
+  test('shows area_id in row when present', () => {
     mockUseEvents.mockReturnValue({ isLoading: false, error: undefined, isValidating: false, data: MOCK_RESPONSE });
     renderPage();
-    expect(screen.getByText('82%')).toBeInTheDocument();
+    expect(screen.getByText('zone-open-plan')).toBeInTheDocument();
   });
 
   // ── Page header ────────────────────────────────────────────────────────────
