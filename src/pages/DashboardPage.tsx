@@ -5,6 +5,7 @@
 import { useEffect, useState } from 'react';
 import { apiFetch }      from '../api/client';
 import { useReport }     from '../hooks/useReport';
+import { useGateways }   from '../hooks/useGateways';
 import KpiWidget        from '../components/widgets/KpiWidget';
 import MapWidget        from '../components/widgets/MapWidget';
 import OccupancyWidget  from '../components/widgets/OccupancyWidget';
@@ -24,10 +25,11 @@ export default function DashboardPage() {
   const [apiError, setApiError] = useState<string | null>(null);
   const todayStr = todayIso();
 
-  const { data: tagsData,   isLoading: tagsLoading   } =
+  const { data: tagsData,    isLoading: tagsLoading    } =
     useReport<ReportRows>('people-day', { from: todayStr, to: todayStr });
-  const { data: alertsData, isLoading: alertsLoading } =
+  const { data: alertsData,  isLoading: alertsLoading  } =
     useReport<ReportRows>('alerts',     { from: todayStr, to: todayStr });
+  const { data: gatewaysData, isLoading: gatewaysLoading } = useGateways();
 
   useEffect(() => {
     apiFetch('/api/v1/me')
@@ -41,9 +43,12 @@ export default function DashboardPage() {
       });
   }, []);
 
-  const tagCount   = tagsLoading   ? '…' : String(tagsData?.length   ?? '—');
-  const alertCount = alertsLoading ? '…' : String(alertsData?.length ?? '—');
-  const hasAlerts  = !alertsLoading && (alertsData?.length ?? 0) > 0;
+  const tagCount     = tagsLoading    ? '…' : String(tagsData?.length   ?? '—');
+  const alertCount   = alertsLoading  ? '…' : String(alertsData?.length ?? '—');
+  const hasAlerts    = !alertsLoading && (alertsData?.length ?? 0) > 0;
+  const onlineCount  = gatewaysLoading
+    ? '…'
+    : String(gatewaysData?.filter(g => g.status === 'online').length ?? '—');
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -73,7 +78,7 @@ export default function DashboardPage() {
           <KpiWidget label="People tracked"  value={tagCount} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <KpiWidget label="Gateways online" value="—" note="Phase 5" />
+          <KpiWidget label="Gateways online" value={onlineCount} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
           <KpiWidget
