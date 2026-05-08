@@ -15,13 +15,29 @@ const LINE_COLORS = [
   CHART_COLORS.warning, CHART_COLORS.negative,
 ];
 
+/** Format an ISO-8601 timestamp to "04 May 09:00" for X-axis labels. */
+function fmtHour(iso: string): string {
+  try {
+    const d = new Date(iso);
+    const day = String(d.getUTCDate()).padStart(2, '0');
+    const mon = d.toLocaleString('en', { month: 'short', timeZone: 'UTC' });
+    const hh  = String(d.getUTCHours()).padStart(2, '0');
+    const mm  = String(d.getUTCMinutes()).padStart(2, '0');
+    return `${day} ${mon} ${hh}:${mm}`;
+  } catch {
+    return iso;
+  }
+}
+
 function pivotAreaRows(rows: AreaOccupancyData): { chartData: AreaOccupancyChartRow[]; areas: string[] } {
   const map = new Map<string, AreaOccupancyChartRow>();
   const areas = new Set<string>();
   for (const row of rows) {
-    areas.add(row.areaId);
-    if (!map.has(row.hour)) map.set(row.hour, { timestamp: row.hour });
-    (map.get(row.hour) as AreaOccupancyChartRow)[row.areaId] = row.tagCount;
+    // API returns area_id (snake_case BQ column) — NOT areaId.
+    areas.add(row.area_id);
+    if (!map.has(row.hour)) map.set(row.hour, { timestamp: fmtHour(row.hour) });
+    // BQ returns INT64 as JSON string — coerce to number so Recharts plots it.
+    (map.get(row.hour) as AreaOccupancyChartRow)[row.area_id] = Number(row.tagCount);
   }
   return { chartData: Array.from(map.values()), areas: Array.from(areas) };
 }

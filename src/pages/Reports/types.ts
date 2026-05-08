@@ -5,9 +5,9 @@
 
 /** R1 — occupancy per area over time (tall format from BQ) */
 export interface AreaOccupancyRow {
-  areaId: string;
-  hour: string;       // TIMESTAMP_TRUNC result, ISO-8601 string
-  tagCount: number;
+  area_id: string;    // BQ column name — no alias in SQL, returned as snake_case
+  hour: string;       // TIMESTAMP_TRUNC result, serialised as date string by BQ
+  tagCount: number;   // COUNT(DISTINCT tag_id) AS tagCount — camelCase alias
 }
 export type AreaOccupancyData = AreaOccupancyRow[];
 

@@ -43,6 +43,7 @@ src/
     LoginPage/
     DashboardPage/
     Reports/      ← FLO-37: 5 chart/table components + ReportsPage
+    OccupancyPage.tsx  ← Analyze → Occupancy (/dashboard/occupancy)
     SitePage/
   styles/       Design-system CSS tokens
   test/         Jest setup + mocks
@@ -55,6 +56,7 @@ src/
 | `/login` | `LoginPage` | Public |
 | `/dashboard` | `DashboardPage` | Required |
 | `/dashboard/reports` | `ReportsPage` (lazy) | Required |
+| `/dashboard/occupancy` | `OccupancyPage` | Required |
 | `/dashboard/:siteId` | `SitePage` | Required |
 
 ## Reports page (FLO-37)
@@ -99,4 +101,4 @@ yarn test             # run all suites
 yarn test:coverage    # with coverage report
 ```
 
-72 tests across 21 suites. All new Reports components and the `useReport` hook are covered.
+81 tests across 22 suites. All report components, the `useReport` hook, and `OccupancyPage` are covered.

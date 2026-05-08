@@ -12,7 +12,8 @@ import { Card, CardContent, CardHeader, Typography, CircularProgress, Alert, Box
 
 export default function BuildingUtilisation({ dateParams = { from: '', to: '' } }: { dateParams?: DateParams }) {
   const { data, error, isLoading } = useReport<UtilisationData>('utilisation/building', dateParams);
-  const chartData = data?.map((r) => ({ date: r.day, utilisation: r.utilisation_pct })) ?? [];
+  // BQ returns FLOAT64 as JSON string — coerce so Recharts plots it.
+  const chartData = data?.map((r) => ({ date: r.day, utilisation: Number(r.utilisation_pct) })) ?? [];
 
   return (
     <Card>

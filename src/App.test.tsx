@@ -64,6 +64,11 @@ jest.mock('./pages/TagsPage', () => ({
   default: () => <div>Tags Page</div>,
 }));
 
+jest.mock('./pages/GatewaysPage', () => ({
+  __esModule: true,
+  default: () => <div>Gateways Page</div>,
+}));
+
 jest.mock('./pages/Reports/ReportsPage', () => ({
   __esModule: true,
   default: () => <div>Reports Page</div>,

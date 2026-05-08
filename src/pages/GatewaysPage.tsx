@@ -1,25 +1,26 @@
 /**
- * TagsPage — /dashboard/tags
+ * GatewaysPage — /dashboard/gateways
  *
- * Shows all BLE tags / devices registered for the tenant.
- * Includes KPI summary cards and a sortable table with battery + status info.
+ * Shows all BLE RSSI-anchor gateways registered for the tenant.
+ * Includes KPI summary cards and a sortable table with status, floor,
+ * zone, tag count and last-heartbeat info.
  *
- * Phase 4: static pilot roster from ft-api /tags endpoint.
- * Phase 5+: live Firestore-backed data once ingest-fn writes tag state.
+ * Phase 4: static pilot roster from ft-api /gateways endpoint.
+ * Phase 5+: live Firestore-backed heartbeat state once ingest-fn writes it.
  */
 import React, { useState } from 'react';
 import {
   Box, Typography, Grid, Card, CardContent,
   Table, TableHead, TableBody, TableRow, TableCell,
   TableContainer, TableSortLabel, Paper,
-  CircularProgress, Alert, Chip, LinearProgress,
+  CircularProgress, Alert, Chip,
 } from '@mui/material';
-import { useTags } from '../hooks/useTags';
-import type { Tag, TagStatus } from '../hooks/useTags';
+import { useGateways } from '../hooks/useGateways';
+import type { Gateway, GatewayStatus } from '../hooks/useGateways';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type SortKey = 'id' | 'label' | 'type' | 'batteryPct' | 'lastSeen' | 'zoneId' | 'floor' | 'status';
+type SortKey = 'id' | 'label' | 'model' | 'floor' | 'zoneId' | 'status' | 'tagCount' | 'lastHeartbeat';
 type SortDir = 'asc' | 'desc';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -33,22 +34,12 @@ function formatTs(ts: string | null): string {
   }
 }
 
-function batteryColor(pct: number | null): 'error' | 'warning' | 'success' {
-  if (pct === null) return 'success';
-  if (pct < 20)    return 'error';
-  if (pct < 40)    return 'warning';
-  return 'success';
-}
-
-function statusChipProps(status: TagStatus): {
-  label: string;
-  sx: object;
-} {
+function statusChipProps(status: GatewayStatus): { label: string; sx: object } {
   switch (status) {
-    case 'active':      return { label: 'Active',      sx: { bgcolor: 'rgba(34,197,94,0.12)',  color: '#22c55e', fontWeight: 600 } };
-    case 'low_battery': return { label: 'Low battery', sx: { bgcolor: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontWeight: 600 } };
-    case 'inactive':    return { label: 'Inactive',    sx: { bgcolor: 'rgba(100,116,139,0.12)',color: '#64748b', fontWeight: 600 } };
-    default:            return { label: status,        sx: {} };
+    case 'online':   return { label: 'Online',   sx: { bgcolor: 'rgba(34,197,94,0.12)',  color: '#22c55e', fontWeight: 600 } };
+    case 'degraded': return { label: 'Degraded', sx: { bgcolor: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontWeight: 600 } };
+    case 'offline':  return { label: 'Offline',  sx: { bgcolor: 'rgba(239,68,68,0.12)',  color: '#ef4444', fontWeight: 600 } };
+    default:         return { label: status,     sx: {} };
   }
 }
 
@@ -72,56 +63,35 @@ function KpiCard({ label, value, sub }: { label: string; value: string | number;
   );
 }
 
-function BatteryBar({ pct }: { pct: number | null }) {
-  if (pct === null) return <Typography variant="caption" color="text.disabled">—</Typography>;
-  return (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 80 }}>
-      <LinearProgress
-        variant="determinate"
-        value={pct}
-        color={batteryColor(pct)}
-        sx={{ flex: 1, height: 6, borderRadius: 3 }}
-      />
-      <Typography variant="caption" sx={{ fontVariantNumeric: 'tabular-nums', minWidth: 32, textAlign: 'right' }}>
-        {pct}%
-      </Typography>
-    </Box>
-  );
-}
-
 // ── Column config ─────────────────────────────────────────────────────────────
 
 const COLUMNS: { key: SortKey; label: string; align?: 'right' }[] = [
-  { key: 'id',         label: 'Tag ID'       },
-  { key: 'label',      label: 'Label'        },
-  { key: 'type',       label: 'Type'         },
-  { key: 'status',     label: 'Status'       },
-  { key: 'batteryPct', label: 'Battery',  align: 'right' },
-  { key: 'zoneId',     label: 'Zone'         },
-  { key: 'floor',      label: 'Floor',    align: 'right' },
-  { key: 'lastSeen',   label: 'Last Seen'    },
+  { key: 'id',            label: 'Gateway ID'    },
+  { key: 'label',         label: 'Label'         },
+  { key: 'model',         label: 'Model'         },
+  { key: 'status',        label: 'Status'        },
+  { key: 'floor',         label: 'Floor',        align: 'right' },
+  { key: 'zoneId',        label: 'Zone'          },
+  { key: 'tagCount',      label: 'Tags seen',    align: 'right' },
+  { key: 'lastHeartbeat', label: 'Last heartbeat' },
 ];
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function TagsPage() {
+export default function GatewaysPage() {
   const [sortKey, setSortKey] = useState<SortKey>('id');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
 
-  const { data, error, isLoading } = useTags();
+  const { data, error, isLoading } = useGateways();
 
   // ── Derived KPIs ────────────────────────────────────────────────────────────
-  const tags       = data ?? [];
-  const active     = tags.filter((t) => t.status === 'active').length;
-  const lowBattery = tags.filter((t) => t.status === 'low_battery').length;
-  const avgBattery = tags.length
-    ? Math.round(
-        tags.reduce((s, t) => s + (t.batteryPct ?? 100), 0) / tags.length,
-      )
-    : 0;
+  const gateways = data ?? [];
+  const online   = gateways.filter((g) => g.status === 'online').length;
+  const offline  = gateways.filter((g) => g.status === 'offline').length;
+  const degraded = gateways.filter((g) => g.status === 'degraded').length;
 
   // ── Sorted rows ─────────────────────────────────────────────────────────────
-  const sorted = [...tags].sort((a, b) => {
+  const sorted = [...gateways].sort((a, b) => {
     const av = a[sortKey] ?? '';
     const bv = b[sortKey] ?? '';
     const cmp = av < bv ? -1 : av > bv ? 1 : 0;
@@ -145,29 +115,25 @@ export default function TagsPage() {
         <Typography variant="overline" sx={{ color: 'primary.main', display: 'block', mb: 0.5 }}>
           Assets
         </Typography>
-        <Typography variant="h1">Tags &amp; devices</Typography>
+        <Typography variant="h1">Gateways</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-          BLE tag registry — battery health, last-seen zone, and live status.
+          BLE RSSI-anchor gateways — connectivity status, zone placement, and live tag visibility.
         </Typography>
       </Box>
 
       {/* ── KPI row ── */}
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <KpiCard label="Total tags" value={isLoading ? '…' : tags.length} />
+          <KpiCard label="Total gateways" value={isLoading ? '…' : gateways.length} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <KpiCard label="Active" value={isLoading ? '…' : active} sub="seen recently" />
+          <KpiCard label="Online" value={isLoading ? '…' : online} sub="active heartbeat" />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <KpiCard
-            label="Low battery"
-            value={isLoading ? '…' : lowBattery}
-            sub="< 20 %"
-          />
+          <KpiCard label="Degraded" value={isLoading ? '…' : degraded} sub="intermittent" />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-          <KpiCard label="Avg battery" value={isLoading ? '…' : `${avgBattery}%`} />
+          <KpiCard label="Offline" value={isLoading ? '…' : offline} sub="no heartbeat" />
         </Grid>
       </Grid>
 
@@ -179,29 +145,36 @@ export default function TagsPage() {
       )}
 
       {error && !isLoading && (
-        <Alert severity="error">Failed to load tags. Check your connection and try again.</Alert>
+        <Alert severity="error">Failed to load gateways. Check your connection and try again.</Alert>
       )}
 
       {/* ── Table ── */}
       {!isLoading && !error && (
-        <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, gap: 1.5 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mt: -2 }}>
             <Chip
-              label={`${tags.length} device${tags.length !== 1 ? 's' : ''}`}
+              label={`${gateways.length} gateway${gateways.length !== 1 ? 's' : ''}`}
               size="small"
               sx={{ bgcolor: 'rgba(124,58,237,0.12)', color: '#9d5cf0', fontWeight: 600 }}
             />
-            {lowBattery > 0 && (
+            {offline > 0 && (
               <Chip
-                label={`${lowBattery} low battery`}
+                label={`${offline} offline`}
+                size="small"
+                sx={{ bgcolor: 'rgba(239,68,68,0.12)', color: '#ef4444', fontWeight: 600 }}
+              />
+            )}
+            {degraded > 0 && (
+              <Chip
+                label={`${degraded} degraded`}
                 size="small"
                 sx={{ bgcolor: 'rgba(245,158,11,0.12)', color: '#f59e0b', fontWeight: 600 }}
               />
             )}
           </Box>
 
-          <Paper sx={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-            <TableContainer sx={{ flex: 1, overflow: 'auto' }}>
+          <Paper sx={{ overflow: 'hidden' }}>
+            <TableContainer sx={{ maxHeight: 'calc(100vh - 360px)', overflow: 'auto' }}>
               <Table size="small" stickyHeader>
                 <TableHead>
                   <TableRow>
@@ -223,41 +196,41 @@ export default function TagsPage() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {sorted.map((tag: Tag) => {
-                    const chip = statusChipProps(tag.status);
+                  {sorted.map((gw: Gateway) => {
+                    const chip = statusChipProps(gw.status);
                     return (
                       <TableRow
-                        key={tag.id}
+                        key={gw.id}
                         hover
                         sx={{ '&:last-child td': { border: 0 } }}
                       >
                         <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.8125rem', fontWeight: 600 }}>
-                          {tag.id}
+                          {gw.id}
                         </TableCell>
                         <TableCell sx={{ fontSize: '0.8125rem' }}>
-                          {tag.label}
+                          {gw.label}
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={tag.type}
+                            label={gw.model}
                             size="small"
-                            sx={{ bgcolor: 'rgba(0,212,255,0.10)', color: '#00d4ff', fontWeight: 600, textTransform: 'capitalize' }}
+                            sx={{ bgcolor: 'rgba(0,212,255,0.10)', color: '#00d4ff', fontWeight: 600 }}
                           />
                         </TableCell>
                         <TableCell>
                           <Chip label={chip.label} size="small" sx={chip.sx} />
                         </TableCell>
-                        <TableCell align="right">
-                          <BatteryBar pct={tag.batteryPct} />
+                        <TableCell align="right" sx={{ color: 'text.secondary', fontSize: '0.8125rem' }}>
+                          {gw.floor}
                         </TableCell>
                         <TableCell sx={{ color: 'text.secondary', fontSize: '0.8125rem' }}>
-                          {tag.zoneId ?? '—'}
+                          {gw.zoneId ?? '—'}
                         </TableCell>
-                        <TableCell align="right" sx={{ color: 'text.secondary', fontSize: '0.8125rem' }}>
-                          {tag.floor ?? '—'}
+                        <TableCell align="right" sx={{ fontVariantNumeric: 'tabular-nums', fontSize: '0.8125rem' }}>
+                          {gw.tagCount}
                         </TableCell>
                         <TableCell sx={{ whiteSpace: 'nowrap', fontSize: '0.8125rem', color: 'text.secondary' }}>
-                          {formatTs(tag.lastSeen)}
+                          {formatTs(gw.lastHeartbeat)}
                         </TableCell>
                       </TableRow>
                     );
@@ -266,7 +239,7 @@ export default function TagsPage() {
                   {sorted.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={8} align="center" sx={{ py: 6, color: 'text.disabled' }}>
-                        No tags registered.
+                        No gateways registered.
                       </TableCell>
                     </TableRow>
                   )}
