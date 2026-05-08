@@ -147,7 +147,7 @@ export default function AppShell() {
         </Box>
       </Drawer>
 
-      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflowX: 'hidden' }}>
         <AppBar position="sticky" elevation={0} sx={{ left: 0 }}>
           <Toolbar sx={{ gap: 3, minHeight: '64px !important', px: 4 }}>
             <TextField
@@ -174,7 +174,7 @@ export default function AppShell() {
           </Toolbar>
         </AppBar>
 
-        <Box component="main" sx={{ flex: 1, p: 4, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <Box component="main" sx={{ flex: 1, minHeight: 0, overflowY: 'auto', p: 4, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <Outlet />
         </Box>
       </Box>
