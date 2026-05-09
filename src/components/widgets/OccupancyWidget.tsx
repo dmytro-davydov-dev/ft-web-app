@@ -16,24 +16,44 @@ interface OccupancyFloorRow {
 
 interface ChartPoint { t: string; v: number; }
 
-function todayIso() { return new Date().toISOString().slice(0, 10); }
+function isoDate(d: Date) { return d.toISOString().slice(0, 10); }
+
+/** Last N days inclusive, formatted as YYYY-MM-DD */
+function dateRange(days: number): { from: string; to: string } {
+  const to = new Date();
+  const from = new Date(to);
+  from.setDate(from.getDate() - (days - 1));
+  return { from: isoDate(from), to: isoDate(to) };
+}
+
+/** Safely extract a "MM/DD" label from any ISO-8601 timestamp string. */
+function parseDayLabel(hour: string): string {
+  try {
+    const d = new Date(hour);
+    if (isNaN(d.getTime())) return hour; // fall back to raw value
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${mm}/${dd}`;
+  } catch {
+    return hour;
+  }
+}
 
 export default function OccupancyWidget() {
-  const todayStr = todayIso();
+  const { from, to } = dateRange(7);
   const { data: rawData, isLoading } = useReport<OccupancyFloorRow[]>(
     'occupancy/floor',
-    { from: todayStr, to: todayStr },
+    { from, to },
   );
 
   const chartData = useMemo<ChartPoint[]>(() => {
     if (!rawData?.length) return [];
-    const byHour: Record<string, number> = {};
+    const byDay: Record<string, number> = {};
     for (const row of rawData) {
-      // row.hour: "2026-05-08T09:00:00+00:00" → take "HH:MM"
-      const hhmm = row.hour.slice(11, 16);
-      byHour[hhmm] = (byHour[hhmm] ?? 0) + row.tagCount;
+      const label = parseDayLabel(row.hour);
+      byDay[label] = (byDay[label] ?? 0) + row.tagCount;
     }
-    return Object.entries(byHour)
+    return Object.entries(byDay)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([t, v]) => ({ t, v }));
   }, [rawData]);
@@ -55,7 +75,7 @@ export default function OccupancyWidget() {
       <CardContent sx={{ pt: 0 }}>
         {isEmpty && (
           <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mb: 1.5 }}>
-            No occupancy events recorded today yet.
+            No occupancy events recorded in the last 7 days.
           </Typography>
         )}
         <ResponsiveContainer width="100%" height={180}>

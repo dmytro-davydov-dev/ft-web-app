@@ -2,14 +2,15 @@
  * SitesPage — /dashboard/sites
  * Rewritten with MUI Card, Tabs, Table, LinearProgress.
  */
-import { useState }              from 'react';
+import { useState, useMemo }     from 'react';
 import { useSites }              from '../hooks/useSites';
 import type { Site, SiteFloor } from '../hooks/useSites';
+import { useGateways }           from '../hooks/useGateways';
 
 import {
   Box, Card, CardContent, CardHeader, Typography,
   Tabs, Tab, Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
-  LinearProgress, Chip, Alert, CircularProgress, SvgIcon, Divider,
+  LinearProgress, Alert, CircularProgress, SvgIcon, Divider,
 } from '@mui/material';
 
 export default function SitesPage() {
@@ -45,6 +46,17 @@ function SiteCard({ site }: { site: Site }) {
 
   const totalZones    = site.floors.reduce((s, f) => s + f.zones.length, 0);
   const totalGateways = site.floors.reduce((s, f) => s + f.gateway_count, 0);
+
+  const { data: gateways } = useGateways();
+  const tagsByZone = useMemo<Record<string, number>>(() => {
+    const map: Record<string, number> = {};
+    if (gateways) {
+      for (const gw of gateways) {
+        if (gw.zoneId) map[gw.zoneId] = (map[gw.zoneId] ?? 0) + gw.tagCount;
+      }
+    }
+    return map;
+  }, [gateways]);
 
   return (
     <Card>
@@ -87,14 +99,14 @@ function SiteCard({ site }: { site: Site }) {
 
       <Divider />
 
-      {currentFloor && <FloorPanel floor={currentFloor} />}
+      {currentFloor && <FloorPanel floor={currentFloor} tagsByZone={tagsByZone} />}
     </Card>
   );
 }
 
 // ── FloorPanel ────────────────────────────────────────────────────────────────
 
-function FloorPanel({ floor }: { floor: SiteFloor }) {
+function FloorPanel({ floor, tagsByZone }: { floor: SiteFloor; tagsByZone: Record<string, number> }) {
   return (
     <CardContent>
       {/* Floor meta */}
@@ -129,35 +141,39 @@ function FloorPanel({ floor }: { floor: SiteFloor }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {floor.zones.map((zone) => (
-              <TableRow key={zone.id}>
-                <TableCell sx={{ color: 'text.primary', fontWeight: 500 }}>
-                  {zone.label}
-                </TableCell>
-                <TableCell align="right">{zone.area_m2.toLocaleString()}</TableCell>
-                <TableCell align="right">—</TableCell>
-                <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={0}
-                      sx={{
-                        flex: 1,
-                        height: 6,
-                        borderRadius: 3,
-                        bgcolor: 'rgba(255,255,255,0.06)',
-                        '& .MuiLinearProgress-bar': { bgcolor: 'primary.main' },
-                      }}
-                    />
-                    <Chip
-                      label="Phase 5"
-                      size="small"
-                      sx={{ height: 18, fontSize: '0.6875rem', bgcolor: 'rgba(255,255,255,0.06)', color: 'text.disabled' }}
-                    />
-                  </Box>
-                </TableCell>
-              </TableRow>
-            ))}
+            {floor.zones.map((zone) => {
+              const activeTags   = tagsByZone[zone.id] ?? 0;
+              // Estimate capacity: 1 person per 5 m² (standard open-plan density)
+              const capacity     = Math.max(1, Math.round(zone.area_m2 / 5));
+              const occupancyPct = Math.min(100, Math.round((activeTags / capacity) * 100));
+              return (
+                <TableRow key={zone.id}>
+                  <TableCell sx={{ color: 'text.primary', fontWeight: 500 }}>
+                    {zone.label}
+                  </TableCell>
+                  <TableCell align="right">{zone.area_m2.toLocaleString()}</TableCell>
+                  <TableCell align="right">{activeTags}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={occupancyPct}
+                        sx={{
+                          flex: 1,
+                          height: 6,
+                          borderRadius: 3,
+                          bgcolor: 'rgba(255,255,255,0.06)',
+                          '& .MuiLinearProgress-bar': { bgcolor: 'primary.main' },
+                        }}
+                      />
+                      <Typography variant="caption" color="text.secondary" sx={{ minWidth: 32, textAlign: 'right' }}>
+                        {occupancyPct}%
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>
