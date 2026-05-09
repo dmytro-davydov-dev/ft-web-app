@@ -183,7 +183,59 @@ export const TableCell      = ({ children, align: _a, sx: _sx, sortDirection: _s
   <td {...(rest as object)}>{children}</td>;
 export const TableSortLabel = ({ children, active: _a, direction: _d, onClick, sx: _sx, ...rest }: AnyProps & { active?: boolean; direction?: string }) =>
   <span role="button" onClick={onClick as React.MouseEventHandler} {...(rest as object)}>{children}</span>;
-export const TablePagination = fwd('div');
+
+export const TablePagination = ({
+  count,
+  page,
+  rowsPerPage,
+  rowsPerPageOptions = [10, 25, 50, 100],
+  onPageChange,
+  onRowsPerPageChange,
+  sx: _sx,
+  ...rest
+}: AnyProps & {
+  count?: number;
+  page?: number;
+  rowsPerPage?: number;
+  rowsPerPageOptions?: number[];
+  onPageChange?: (e: React.MouseEvent, newPage: number) => void;
+  onRowsPerPageChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+}) => {
+  const totalPages = Math.ceil((count ?? 0) / (rowsPerPage ?? 1));
+  const from = (page ?? 0) * (rowsPerPage ?? 0) + 1;
+  const to   = Math.min(((page ?? 0) + 1) * (rowsPerPage ?? 0), count ?? 0);
+  return (
+    <td {...(rest as object)}>
+      <span>{`${from}–${to} of ${count}`}</span>
+      <label>
+        Rows per page:
+        <select
+          role="combobox"
+          value={rowsPerPage}
+          onChange={(e) => onRowsPerPageChange?.(e as React.ChangeEvent<HTMLSelectElement>)}
+        >
+          {(rowsPerPageOptions as number[]).map((opt) => (
+            <option key={opt} value={opt} role="option">{opt}</option>
+          ))}
+        </select>
+      </label>
+      <button
+        aria-label="previous page"
+        disabled={(page ?? 0) === 0}
+        onClick={(e) => onPageChange?.(e, (page ?? 0) - 1)}
+      >
+        &lt;
+      </button>
+      <button
+        aria-label="next page"
+        disabled={(page ?? 0) >= totalPages - 1}
+        onClick={(e) => onPageChange?.(e, (page ?? 0) + 1)}
+      >
+        &gt;
+      </button>
+    </td>
+  );
+};
 
 // ── Surfaces / overlays ──────────────────────────────────────────────────────
 export const Avatar = ({ children, sx: _sx, ...rest }: AnyProps) =>

@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { useEvents } from '../hooks/useEvents';
 import type { LocationEvent } from '../hooks/useEvents';
+import { TablePaginationBar } from '../components/ui/TablePaginationBar';
 
 // ── Time-filter config ────────────────────────────────────────────────────────
 
@@ -83,8 +84,12 @@ function RssiBadge({ rssi }: { rssi: number }) {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
+const DEFAULT_ROWS_PER_PAGE = 25;
+
 export default function EventsStreamPage() {
   const [filter, setFilter] = useState<TimeFilter>('live');
+  const [page, setPage]               = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(DEFAULT_ROWS_PER_PAGE);
 
   const today        = toIsoDate(new Date());
   const sevenDaysAgo = toIsoDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
@@ -97,7 +102,24 @@ export default function EventsStreamPage() {
     refreshInterval: config.refreshInterval,
   });
 
-  const rows: LocationEvent[] = data?.rows ?? [];
+  const allRows: LocationEvent[] = data?.rows ?? [];
+  const pageStart = page * rowsPerPage;
+  const rows      = allRows.slice(pageStart, pageStart + rowsPerPage);
+
+  function handleFilterChange(_e: React.MouseEvent<HTMLElement>, val: TimeFilter | null) {
+    if (!val) return;
+    setFilter(val);
+    setPage(0);
+  }
+
+  function handlePageChange(newPage: number) {
+    setPage(newPage);
+  }
+
+  function handleRowsPerPageChange(newRowsPerPage: number) {
+    setRowsPerPage(newRowsPerPage);
+    setPage(0);
+  }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -136,9 +158,7 @@ export default function EventsStreamPage() {
           <ToggleButtonGroup
             value={filter}
             exclusive
-            onChange={(_e: React.MouseEvent<HTMLElement>, val: TimeFilter | null) => {
-              if (val) setFilter(val);
-            }}
+            onChange={handleFilterChange}
             size="small"
             sx={{
               bgcolor: 'background.paper',
@@ -243,7 +263,7 @@ export default function EventsStreamPage() {
                   </TableRow>
                 ))}
 
-                {rows.length === 0 && (
+                {allRows.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} align="center" sx={{ py: 6, color: 'text.disabled' }}>
                       No events for this period.
@@ -251,6 +271,14 @@ export default function EventsStreamPage() {
                   </TableRow>
                 )}
               </TableBody>
+
+              <TablePaginationBar
+                count={allRows.length}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleRowsPerPageChange}
+              />
             </Table>
           </TableContainer>
         </Paper>
