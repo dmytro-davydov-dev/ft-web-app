@@ -62,6 +62,37 @@
   --motion-std:  200ms ease-out;
 }
 
+/* ── Light theme overrides (Option A — White & Blue) ─────────────────────── */
+[data-theme="light"] {
+  /* Backgrounds */
+  --color-bg-primary:    #f0f4f8;
+  --color-bg-surface:    #ffffff;
+  --color-bg-card:       #ffffff;
+  --color-border-subtle: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(0, 0, 0, 0.16);
+
+  /* Text */
+  --color-text-primary:   #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-muted:     #9ca3af;
+
+  /* Accent — blue replaces cyan for light backgrounds */
+  --color-accent-primary: #2563eb;
+  --color-accent-purple:  #7c3aed;
+
+  /* Semantic */
+  --color-positive: #16a34a;
+  --color-negative: #dc2626;
+  --color-warning:  #d97706;
+
+  /* Tints */
+  --tint-accent:   rgba(37, 99, 235, 0.08);
+  --tint-purple:   rgba(124, 58, 237, 0.10);
+  --tint-positive: rgba(22, 163, 74, 0.10);
+  --tint-negative: rgba(220, 38, 38, 0.10);
+  --tint-warning:  rgba(217, 119, 6, 0.10);
+}
+
 /* Reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 

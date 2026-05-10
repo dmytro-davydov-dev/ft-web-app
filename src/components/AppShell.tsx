@@ -6,6 +6,7 @@ import type { SVGProps } from 'react';
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import ThemeSwitcher from './ThemeSwitcher';
 import {
   Box, Drawer, AppBar, Toolbar, List, ListSubheader,
   ListItemButton, ListItemIcon, ListItemText, Avatar,
@@ -46,6 +47,14 @@ const NAV_ITEMS: NavSection[] = [
     items: [
       { to: '/dashboard/reports',   label: 'Reports',          icon: IconReports   },
       { to: '/dashboard/occupancy', label: 'Occupancy trends', icon: IconOccupancy },
+    ],
+  },
+  {
+    section: 'Manage',
+    items: [
+      { to: '/dashboard/manage/sites',   label: 'Sites',   icon: IconManageSites   },
+      { to: '/dashboard/manage/people',  label: 'People',  icon: IconManagePeople  },
+      { to: '/dashboard/manage/assets',  label: 'Assets',  icon: IconManageAssets  },
     ],
   },
 ];
@@ -159,6 +168,7 @@ export default function AppShell() {
               }}
             />
             <Box sx={{ flex: 1 }} />
+            <ThemeSwitcher />
             <ToggleButtonGroup
               value={timeFilter}
               exclusive
@@ -194,3 +204,6 @@ function IconTags() { return <svg viewBox="0 0 24 24" fill="none" stroke="curren
 function IconGateways() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 12a8 8 0 0116 0"/><path d="M8 12a4 4 0 018 0"/><circle cx="12" cy="12" r="1.2"/></svg>; }
 function IconReports() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 19V7M10 19V4M16 19v-7M22 19H2"/></svg>; }
 function IconOccupancy() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 5-6"/></svg>; }
+function IconManageSites() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="10" width="18" height="11" rx="1.5"/><path d="M3 10l9-7 9 7"/><path d="M9 21v-6h6v6"/></svg>; }
+function IconManagePeople() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="9" cy="7" r="3"/><path d="M2 21c1-4 3.5-6 7-6s6 2 7 6"/><circle cx="18" cy="8" r="2.5"/><path d="M18 13c2 0 3.5 1.5 4 4"/></svg>; }
+function IconManageAssets() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="7" width="18" height="12" rx="2"/><path d="M7 7V5a2 2 0 012-2h6a2 2 0 012 2v2"/><circle cx="12" cy="13" r="1.2" fill="currentColor" stroke="none"/></svg>; }

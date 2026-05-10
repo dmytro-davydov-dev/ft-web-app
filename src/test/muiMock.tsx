@@ -64,8 +64,38 @@ export const ButtonBase = fwd('button');
 export const Fab = fwd('button');
 
 // ── TextField ────────────────────────────────────────────────────────────────
-export const TextField = ({ label, type = 'text', placeholder, value, onChange, required, autoComplete, fullWidth: _fw, size: _s, sx: _sx, inputProps, slotProps, ...rest }: AnyProps & { label?: string; type?: string; placeholder?: string; value?: string; onChange?: React.ChangeEventHandler<HTMLInputElement>; required?: boolean; autoComplete?: string; fullWidth?: boolean; size?: string; inputProps?: Record<string, unknown>; slotProps?: Record<string, unknown> }) => {
+export const TextField = ({
+  label, type = 'text', placeholder, value, onChange, required, autoComplete,
+  fullWidth: _fw, size: _s, sx: _sx, inputProps, slotProps,
+  select, multiline, minRows: _minRows, maxRows: _maxRows,
+  children,
+  ...rest
+}: AnyProps & {
+  label?: string; type?: string; placeholder?: string; value?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>;
+  required?: boolean; autoComplete?: string; fullWidth?: boolean; size?: string;
+  inputProps?: Record<string, unknown>; slotProps?: Record<string, unknown>;
+  select?: boolean; multiline?: boolean; minRows?: number; maxRows?: number;
+}) => {
   const mergedInputProps = { ...(inputProps ?? {}), ...((slotProps as { input?: object } | undefined)?.input ?? {}) };
+  if (select) {
+    return (
+      <label>
+        {label}
+        <select value={value} onChange={onChange as React.ChangeEventHandler<HTMLSelectElement>} required={required} {...mergedInputProps} {...(rest as object)}>
+          {children}
+        </select>
+      </label>
+    );
+  }
+  if (multiline) {
+    return (
+      <label>
+        {label}
+        <textarea placeholder={placeholder} value={value} onChange={onChange as React.ChangeEventHandler<HTMLTextAreaElement>} required={required} {...mergedInputProps} {...(rest as object)} />
+      </label>
+    );
+  }
   return (
     <label>
       {label}
@@ -73,7 +103,7 @@ export const TextField = ({ label, type = 'text', placeholder, value, onChange, 
         type={type}
         placeholder={placeholder}
         value={value}
-        onChange={onChange}
+        onChange={onChange as React.ChangeEventHandler<HTMLInputElement>}
         required={required}
         autoComplete={autoComplete}
         {...mergedInputProps}

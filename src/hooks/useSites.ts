@@ -3,8 +3,14 @@
  *
  * Returns the list of sites (Phase 4: one static pilot site; multi-site in Phase 6).
  * No key is emitted until customerId resolves from the Firebase JWT.
+ *
+ * Also exports createSite() — writes a new site document directly to Firestore
+ * under customers/{customerId}/sites. File uploads (drawing / photos) remain a
+ * Phase 5 concern (GCS signed URLs via ft-api).
  */
 import useSWR from 'swr';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase/config';
 import { apiFetch } from '../api/client';
 import { useAuth }  from '../context/AuthContext';
 
@@ -27,6 +33,9 @@ export interface Site {
   id: string;
   name: string;
   description: string;
+  address?: string;
+  drawing_gcs?: string | null;
+  photo_gcs?: string[];
   floorplan: {
     width_m: number;
     height_m: number;
@@ -34,6 +43,46 @@ export interface Site {
     floor_area_m2: number;
   };
   floors: SiteFloor[];
+}
+
+// ── Firestore create ──────────────────────────────────────────────────────────
+
+export interface CreateSiteInput {
+  name: string;
+  description: string;
+  address: string;
+}
+
+/**
+ * Write a new site document to Firestore and return the canonical Site object.
+ * File uploads (drawing / photos) are handled separately in Phase 5.
+ */
+export async function createSite(
+  customerId: string,
+  input: CreateSiteInput,
+): Promise<Site> {
+  const sitesRef = collection(db, 'customers', customerId, 'sites');
+  const docRef = await addDoc(sitesRef, {
+    name:        input.name,
+    description: input.description,
+    address:     input.address,
+    drawing_gcs: null,
+    photo_gcs:   [],
+    floorplan:   { width_m: 0, height_m: 0, floors: 1, floor_area_m2: 0 },
+    floors:      [],
+    createdAt:   serverTimestamp(),
+  });
+
+  return {
+    id:          docRef.id,
+    name:        input.name,
+    description: input.description,
+    address:     input.address,
+    drawing_gcs: null,
+    photo_gcs:   [],
+    floorplan:   { width_m: 0, height_m: 0, floors: 1, floor_area_m2: 0 },
+    floors:      [],
+  };
 }
 
 interface SitesResponse {

@@ -38,26 +38,40 @@ src/
   components/   Shared layout (AppShell, ProtectedRoute) + widgets
   context/      AuthContext — Firebase Auth state
   firebase/     Firebase SDK config
-  hooks/        useReport — SWR hook for all 5 report endpoints
+  hooks/        SWR hooks — useSites, useReport, useGateways, useTags, ...
   pages/
     LoginPage/
     DashboardPage/
-    Reports/      ← FLO-37: 5 chart/table components + ReportsPage
-    OccupancyPage.tsx  ← Analyze → Occupancy (/dashboard/occupancy)
-    SitePage/
+    Reports/        ← Analyze → Reports (lazy-loaded, Recharts code-split)
+    OccupancyPage/  ← Analyze → Occupancy trends
+    SitesPage/      ← Live → Sites & floors (read-only view)
+    SitePage/       ← /dashboard/:siteId detail
+    Manage/         ← Manage section
+      ManageSitesPage.tsx    ← Sites CRUD + drawing/photo uploads
+      ManagePeoplePage.tsx   ← Stub (Phase 5)
+      ManageDevicesPage.tsx  ← Stub (Phase 5)
   styles/       Design-system CSS tokens
   test/         Jest setup + mocks
 ```
 
 ## Routes
 
-| Path | Component | Auth |
-|---|---|---|
-| `/login` | `LoginPage` | Public |
-| `/dashboard` | `DashboardPage` | Required |
-| `/dashboard/reports` | `ReportsPage` (lazy) | Required |
-| `/dashboard/occupancy` | `OccupancyPage` | Required |
-| `/dashboard/:siteId` | `SitePage` | Required |
+| Path | Component | Auth | Section |
+|---|---|---|---|
+| `/login` | `LoginPage` | Public | — |
+| `/dashboard` | `DashboardPage` | Required | Live |
+| `/dashboard/sites` | `SitesPage` | Required | Live |
+| `/dashboard/events` | `EventsStreamPage` | Required | Live |
+| `/dashboard/geofences` | `GeofencesPage` | Required | Live |
+| `/dashboard/people` | `PeoplePage` | Required | Assets |
+| `/dashboard/tags` | `TagsPage` | Required | Assets |
+| `/dashboard/gateways` | `GatewaysPage` | Required | Assets |
+| `/dashboard/reports` | `ReportsPage` (lazy) | Required | Analyze |
+| `/dashboard/occupancy` | `OccupancyPage` | Required | Analyze |
+| `/dashboard/manage/sites` | `ManageSitesPage` | Required | **Manage** |
+| `/dashboard/manage/people` | `ManagePeoplePage` | Required | **Manage** |
+| `/dashboard/manage/devices` | `ManageDevicesPage` | Required | **Manage** |
+| `/dashboard/:siteId` | `SitePage` | Required | — |
 
 ## Reports page (FLO-37)
 
@@ -87,6 +101,12 @@ Full URL resolved to: `GET /v1/customers/{customerId}/reporting/{reportType}[?pa
 
 Auth token is attached automatically via `apiFetch` (Firebase `getIdToken()`). SWR key is `null` until `customerId` is available — prevents premature fetches on first render.
 
+## Manage → Sites
+
+Self-service site creation at `/dashboard/manage/sites`. Managers can create a new site with name, description, address, a floor drawing (PNG/JPG/SVG/PDF, drag-and-drop), and up to 10 site photos.
+
+Newly created sites appear immediately via optimistic local state. The API `POST` + GCS signed-URL upload path is stubbed and ready for Phase 5 wiring — see `documentation/manage-sites.md` for details.
+
 ## Environment variables
 
 | Variable | Default | Purpose |
@@ -101,4 +121,4 @@ yarn test             # run all suites
 yarn test:coverage    # with coverage report
 ```
 
-81 tests across 22 suites. All report components, the `useReport` hook, and `OccupancyPage` are covered.
+90 tests across 23 suites. All report components, the `useReport` hook, `OccupancyPage`, and `ManageSitesPage` are covered.
