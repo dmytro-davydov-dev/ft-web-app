@@ -1,0 +1,59 @@
+rules_version = '2';
+
+// Flowterra Firestore security rules.
+//
+// Auth model: Firebase Auth with a custom claim "customerId" set server-side
+// (ft-api) when a user is provisioned. Every rule checks:
+//   1. The caller is authenticated (request.auth != null)
+//   2. The customerId in the JWT claim matches the path segment
+//
+// Deploy: firebase deploy --only firestore:rules
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Customer-scoped data ───────────────────────────────────────────────────
+    //
+    // All tenant data lives under customers/{customerId}/...
+    // The JWT custom claim "customerId" must match the path segment.
+
+    // Customer root document (read-only; written by ft-api)
+    match /customers/{customerId} {
+      allow read:  if request.auth != null
+                   && request.auth.token.customerId == customerId;
+      allow write: if false;
+    }
+
+    // Sites — managers can create and read; scoped to their tenant
+    match /customers/{customerId}/sites/{siteId} {
+      allow read:   if request.auth != null
+                    && request.auth.token.customerId == customerId;
+      allow create: if request.auth != null
+                    && request.auth.token.customerId == customerId
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0;
+      allow update: if request.auth != null
+                    && request.auth.token.customerId == customerId;
+      allow delete: if false; // soft-delete only (Phase 5+)
+    }
+
+    // All other customer sub-collections — read-only from client; written by ft-api
+    match /customers/{customerId}/{collection}/{docId} {
+      allow read:  if request.auth != null
+                   && request.auth.token.customerId == customerId;
+      allow write: if false;
+    }
+
+    // Nested sub-collections (e.g. sites/{siteId}/floors/{floorId})
+    match /customers/{customerId}/{collection}/{docId}/{rest=**} {
+      allow read:  if request.auth != null
+                   && request.auth.token.customerId == customerId;
+      allow write: if false;
+    }
+
+    // Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
