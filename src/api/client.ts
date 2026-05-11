@@ -21,6 +21,7 @@ export async function apiFetch(
   options: RequestInit = {},
 ): Promise<Response> {
   const token = await auth.currentUser?.getIdToken();
+  console.debug('apiFetch:::', { url, options, token: token ? '***' : null });
 
   const headers = new Headers(options.headers);
   if (token) {

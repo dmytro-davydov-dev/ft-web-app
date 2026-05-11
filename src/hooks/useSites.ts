@@ -94,6 +94,8 @@ interface SitesResponse {
 
 async function sitesFetcher(url: string): Promise<Site[]> {
   const res = await apiFetch(url);
+  console.debug('sitesFetcher:::', { url, res });
+
   if (!res.ok) throw new Error(`Sites fetch failed: ${res.status}`);
   const json = (await res.json()) as SitesResponse;
   return json.sites;
@@ -103,6 +105,8 @@ async function sitesFetcher(url: string): Promise<Site[]> {
 
 export function useSites() {
   const { customerId } = useAuth();
+  console.debug('useSites:::', { customerId });
+
   const key = customerId ? `/api/v1/customers/${customerId}/sites` : null;
   return useSWR<Site[]>(key, sitesFetcher);
 }
