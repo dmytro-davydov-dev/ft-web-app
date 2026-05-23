@@ -19,7 +19,7 @@ export function useSiteCaptures(siteId: string | undefined) {
 
   const key =
     customerId && siteId
-      ? `/api/v1/drone/sites/${siteId}/captures?status=ready&limit=1&order=captured_at:desc`
+      ? `/api/v1/drone/sites/${siteId}/captures?status=ready&order=captured_at:desc`
       : null;
 
   return useSWR<Capture[]>(key, capturesFetcher);

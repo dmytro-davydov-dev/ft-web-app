@@ -10,13 +10,21 @@ export type CaptureStatus =
   | 'ready'
   | 'error';
 
+export interface CaptureMetadata {
+  detail?: string;
+  gsd_cm?: number | null;
+  odm_version?: string;
+  processed_at?: string;
+}
+
 export interface Capture {
   id: string;
   siteId: string;
   status: CaptureStatus;
   tiles_url: string | null;
   captured_at: string;
-  metadata?: { detail?: string };
+  photo_count?: number | null;
+  metadata?: CaptureMetadata;
 }
 
 interface CaptureResponse {
