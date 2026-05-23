@@ -55,7 +55,7 @@ describe('useSiteCaptures', () => {
     mockUseAuth.mockReturnValue({ customerId: 'cust-1' });
     renderHook(() => useSiteCaptures('site-1'));
     expect(capturedKey).toBe(
-      '/api/v1/drone/sites/site-1/captures?status=ready&limit=1&order=captured_at:desc',
+      '/api/v1/drone/sites/site-1/captures?status=ready&order=captured_at:desc',
     );
   });
 
@@ -65,7 +65,7 @@ describe('useSiteCaptures', () => {
 
     renderHook(() => useSiteCaptures('site-1'));
     const result = await capturedFetcher!(
-      '/api/v1/drone/sites/site-1/captures?status=ready&limit=1&order=captured_at:desc',
+      '/api/v1/drone/sites/site-1/captures?status=ready&order=captured_at:desc',
     );
     expect(result).toEqual([CAPTURE]);
   });
@@ -76,7 +76,7 @@ describe('useSiteCaptures', () => {
 
     renderHook(() => useSiteCaptures('site-1'));
     await expect(
-      capturedFetcher!('/api/v1/drone/sites/site-1/captures?status=ready&limit=1&order=captured_at:desc'),
+      capturedFetcher!('/api/v1/drone/sites/site-1/captures?status=ready&order=captured_at:desc'),
     ).rejects.toThrow('Captures fetch failed: 403');
   });
 });

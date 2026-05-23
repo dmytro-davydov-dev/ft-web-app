@@ -20,6 +20,16 @@ jest.mock('../components/Drone/PotreeViewer', () => ({
   default: ({ captureId }: { captureId: string }) => <div data-testid={`potree-${captureId}`} />,
 }));
 
+jest.mock('../components/Drone/CaptureTimeline', () => ({
+  __esModule: true,
+  default: () => <div data-testid="capture-timeline" />,
+}));
+
+jest.mock('../components/Drone/CaptureDetail', () => ({
+  __esModule: true,
+  default: () => <div data-testid="capture-detail" />,
+}));
+
 import SitePage from './SitePage';
 
 function renderSite(siteId = 'site-17') {
