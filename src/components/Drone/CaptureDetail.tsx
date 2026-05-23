@@ -53,10 +53,10 @@ interface MetaRowProps {
 function MetaRow({ label, value }: MetaRowProps) {
   return (
     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
+      <Typography component="span" variant="body2" color="text.secondary" sx={{ minWidth: 120 }}>
         {label}:
       </Typography>
-      <Typography variant="body2">{value}</Typography>
+      <Typography component="span" variant="body2">{value}</Typography>
     </Box>
   );
 }
