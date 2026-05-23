@@ -327,6 +327,12 @@ export const useMediaQuery  = () => false;
 export const useTheme       = () => ({});
 export const createTheme    = () => ({});
 
+// ── Default export — used by `import XIcon from '@mui/icons-material/X'` ─────
+// The moduleNameMapper sends all @mui/icons-material/* imports here.
+// Returning a null component prevents "Element type is invalid: got undefined" errors.
+const _IconStub = () => null;
+export default _IconStub;
+
 // ── Accordion ────────────────────────────────────────────────────────────────
 export const Accordion        = fwd('div');
 export const AccordionSummary = fwd('div');

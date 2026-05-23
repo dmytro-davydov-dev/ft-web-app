@@ -1,5 +1,8 @@
+import { useState } from 'react';
 import { Box, Typography, CircularProgress } from '@mui/material';
 import { useCaptureStatus, type CaptureStatus as CaptureStatusType } from '../../hooks/useCaptureStatus';
+import { apiFetch } from '../../api/client';
+import CaptureError from './CaptureError';
 
 interface StatusConfig {
   icon: string;
@@ -22,7 +25,20 @@ export interface CaptureStatusProps {
 }
 
 export default function CaptureStatus({ siteId, captureId }: CaptureStatusProps) {
-  const { data, error } = useCaptureStatus(siteId, captureId);
+  const { data, error, mutate } = useCaptureStatus(siteId, captureId);
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      await apiFetch(`/api/v1/drone/sites/${siteId}/captures/${captureId}/process`, { method: 'POST' });
+      await mutate();
+    } catch {
+      // error surfaced through the next poll
+    } finally {
+      setIsRetrying(false);
+    }
+  };
 
   if (error) {
     return (
@@ -46,8 +62,17 @@ export default function CaptureStatus({ siteId, captureId }: CaptureStatusProps)
     );
   }
 
+  if (data.status === 'error') {
+    return (
+      <CaptureError
+        errorDetail={data.metadata?.detail ?? data.metadata?.error}
+        onRetry={handleRetry}
+        isRetrying={isRetrying}
+      />
+    );
+  }
+
   const config = STATUS_CONFIG[data.status];
-  const errorDetail = data.status === 'error' ? data.metadata?.detail : undefined;
 
   return (
     <Box
@@ -68,7 +93,6 @@ export default function CaptureStatus({ siteId, captureId }: CaptureStatusProps)
       )}
       <Typography variant="body2">
         {config.label}
-        {errorDetail ? ` — ${errorDetail}` : ''}
       </Typography>
     </Box>
   );
