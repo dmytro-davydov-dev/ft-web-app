@@ -107,6 +107,17 @@ Self-service site creation at `/dashboard/manage/sites`. Managers can create a n
 
 Newly created sites appear immediately via optimistic local state. The API `POST` + GCS signed-URL upload path is stubbed and ready for Phase 5 wiring — see `documentation/manage-sites.md` for details.
 
+## Drone 3D Viewer (Phase 6 / FLO-40)
+
+`/dashboard/:siteId` now renders the most-recent `ready` drone capture as a navigable 3D point cloud powered by [Potree](https://potree.org).
+
+- **Lazy-loaded** — Potree (~800 KB) is code-split via `React.lazy`; excluded from the main bundle.
+- **GCS streaming** — tiles are fetched directly from a public GCS URL; entry point is `{tiles_url}metadata.json`.
+- **Controls** — point-size slider, colour-by-height toggle, reset-view button overlaid on the canvas.
+- **Status polling** — `CaptureStatus` component polls every 15 s while `processing` or `tiling`; stops on `ready`/`error`.
+
+See `documentation/drone-viewer.md` for full component API reference.
+
 ## Environment variables
 
 | Variable | Default | Purpose |

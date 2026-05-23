@@ -296,6 +296,19 @@ export const DialogActions      = fwd('div');
 export const SvgIcon = ({ children, sx: _sx, inheritViewBox: _iv, component: _c, ...rest }: AnyProps & { inheritViewBox?: boolean; component?: unknown }) =>
   <svg aria-hidden {...(rest as object)}>{children}</svg>;
 
+// ── Slider ───────────────────────────────────────────────────────────────────
+export const Slider = ({ value, onChange, min, max, step, size: _s, sx: _sx, 'aria-label': ariaLabel, ...rest }: AnyProps & { value?: number; onChange?: (e: Event, v: number | number[]) => void; min?: number; max?: number; step?: number; size?: string; 'aria-label'?: string }) =>
+  <input
+    type="range"
+    aria-label={ariaLabel}
+    value={value}
+    min={min}
+    max={max}
+    step={step}
+    onChange={(e) => onChange?.(e as unknown as Event, parseFloat(e.target.value))}
+    {...(rest as object)}
+  />;
+
 // ── Misc ─────────────────────────────────────────────────────────────────────
 export const Collapse = ({ children, in: _in, ...rest }: AnyProps & { in?: boolean }) => <div {...(rest as object)}>{children}</div>;
 export const Fade     = ({ children, in: _in, ...rest }: AnyProps & { in?: boolean }) => <div {...(rest as object)}>{children}</div>;
