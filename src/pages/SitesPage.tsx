@@ -3,12 +3,13 @@
  * Rewritten with MUI Card, Tabs, Table, LinearProgress.
  */
 import { useState, useMemo }     from 'react';
+import { useNavigate }           from 'react-router-dom';
 import { useSites }              from '../hooks/useSites';
 import type { Site, SiteFloor } from '../hooks/useSites';
 import { useGateways }           from '../hooks/useGateways';
 
 import {
-  Box, Card, CardContent, CardHeader, Typography,
+  Box, Button, Card, CardContent, CardHeader, Typography,
   Tabs, Tab, Table, TableHead, TableBody, TableRow, TableCell, TableContainer,
   LinearProgress, Alert, CircularProgress, SvgIcon, Divider,
 } from '@mui/material';
@@ -41,6 +42,7 @@ export default function SitesPage() {
 // ── SiteCard ─────────────────────────────────────────────────────────────────
 
 function SiteCard({ site }: { site: Site }) {
+  const navigate = useNavigate();
   const [activeFloor, setActiveFloor] = useState(site.floors[0]?.floor ?? 1);
   const currentFloor = site.floors.find((f) => f.floor === activeFloor);
 
@@ -64,7 +66,25 @@ function SiteCard({ site }: { site: Site }) {
         title={
           <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
             <Box>
-              <Typography variant="h3" sx={{ mb: 0.25 }}>{site.name}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap', mb: 0.25 }}>
+                <Typography variant="h3">{site.name}</Typography>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={() => navigate(`/dashboard/sites/${site.id}/site-maps`)}
+                  sx={{ fontSize: '0.75rem', py: 0.25, px: 1, minWidth: 0 }}
+                >
+                  Site Maps
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  disabled
+                  sx={{ fontSize: '0.75rem', py: 0.25, px: 1, minWidth: 0 }}
+                >
+                  Site Analytics
+                </Button>
+              </Box>
               <Typography variant="body2" color="text.secondary">
                 {site.floorplan.floors} floors · {totalZones} zones · {totalGateways} gateways
               </Typography>

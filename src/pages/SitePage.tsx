@@ -23,7 +23,7 @@ export default function SitePage() {
 
   const activeCapture = captures?.find((c) => c.id === activeCaptureId) ?? captures?.[0] ?? null;
 
-  const handleTimelineSelect = (captureId: string) => {
+  const handleTimelineSelect = (captureId: string, _tilesUrl: string) => {
     setActiveCaptureId(captureId);
   };
 

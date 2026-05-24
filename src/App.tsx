@@ -15,6 +15,7 @@
  *   /dashboard/manage/sites        → ManageSitesPage (auth-gated, create/upload)
  *   /dashboard/manage/people       → ManagePeoplePage (auth-gated, Phase 5 stub)
  *   /dashboard/manage/assets       → ManageAssetsPage (auth-gated, asset tag management)
+ *   /dashboard/sites/:siteId/site-maps → SiteMapsPage (auth-gated, 2D floor map + 3D viewer + photos)
  *   /dashboard/:siteId             → SitePage (auth-gated, individual site detail stub)
  *   /*                             → redirect to /login
  */
@@ -37,6 +38,7 @@ import OccupancyPage         from './pages/OccupancyPage';
 import ManageSitesPage       from './pages/Manage/ManageSitesPage';
 import ManagePeoplePage      from './pages/Manage/ManagePeoplePage';
 import ManageAssetsPage      from './pages/Manage/ManageAssetsPage';
+import SiteMapsPage          from './pages/SiteMapsPage';
 
 // Lazy-load ReportsPage so Recharts is code-split into its own chunk.
 const ReportsPage = lazy(() => import('./pages/Reports/ReportsPage'));
@@ -68,7 +70,10 @@ export default function App() {
           >
             <Route index element={<DashboardPage />} />
             {/* Named routes must come before the :siteId catch-all */}
-            <Route path="sites"      element={<SitesPage />} />
+            <Route path="sites">
+              <Route index element={<SitesPage />} />
+              <Route path=":siteId/site-maps" element={<SiteMapsPage />} />
+            </Route>
             <Route path="events"     element={<EventsStreamPage />} />
             <Route path="geofences"  element={<GeofencesPage />} />
             <Route path="people"     element={<PeoplePage />} />
@@ -84,10 +89,10 @@ export default function App() {
             />
             <Route path="occupancy"      element={<OccupancyPage />} />
             {/* Manage — must come before :siteId catch-all */}
-            <Route path="manage/sites"   element={<ManageSitesPage />} />
-            <Route path="manage/people"  element={<ManagePeoplePage />} />
-            <Route path="manage/assets"  element={<ManageAssetsPage />} />
-            <Route path=":siteId"        element={<SitePage />} />
+            <Route path="manage/sites"              element={<ManageSitesPage />} />
+            <Route path="manage/people"             element={<ManagePeoplePage />} />
+            <Route path="manage/assets"             element={<ManageAssetsPage />} />
+            <Route path=":siteId"                   element={<SitePage />} />
           </Route>
 
           {/* Catch-all → /login */}
