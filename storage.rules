@@ -1,0 +1,38 @@
+rules_version = '2';
+
+// Flowterra Firebase Storage security rules.
+//
+// Deploy: firebase deploy --only storage
+// Emulator: automatically picked up via firebase.json
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Site photos uploaded from SiteMapsPage (5 MB limit, images only)
+    match /sites/{siteId}/site-photos/{filename} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size <= 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Site photos and drawings from ManageSitesPage (10 MB limit)
+    match /sites/{siteId}/photos/{filename} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size <= 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    match /sites/{siteId}/drawing/{filename} {
+      allow read:  if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size <= 20 * 1024 * 1024;
+    }
+
+    // Deny everything else
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

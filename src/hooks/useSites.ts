@@ -9,12 +9,22 @@
  * Phase 5 concern (GCS signed URLs via ft-api).
  */
 import useSWR from 'swr';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { apiFetch } from '../api/client';
 import { useAuth }  from '../context/AuthContext';
 
 // ── Domain types ─────────────────────────────────────────────────────────────
+
+export interface SitePhoto {
+  url: string;
+  storagePath: string;
+  takenAt: string;     // YYYY-MM-DD
+  comment: string;
+  uploadedAt: string;  // ISO timestamp
+  filename: string;
+  sizeBytes: number;
+}
 
 export interface SiteZone {
   id: string;
@@ -36,6 +46,7 @@ export interface Site {
   address?: string;
   drawing_gcs?: string | null;
   photo_gcs?: string[];
+  sitePhotos?: SitePhoto[];
   floorplan: {
     width_m: number;
     height_m: number;
@@ -83,6 +94,15 @@ export async function createSite(
     floorplan:   { width_m: 0, height_m: 0, floors: 1, floor_area_m2: 0 },
     floors:      [],
   };
+}
+
+export async function addSitePhoto(
+  customerId: string,
+  siteId: string,
+  photo: SitePhoto,
+): Promise<void> {
+  const siteRef = doc(db, 'customers', customerId, 'sites', siteId);
+  await updateDoc(siteRef, { sitePhotos: arrayUnion(photo) });
 }
 
 interface SitesResponse {

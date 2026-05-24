@@ -1,26 +1,44 @@
-import { lazy, Suspense, useState, useEffect, useRef } from 'react';
+import { lazy, Suspense, useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import {
   Alert,
   Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  LinearProgress,
   Paper,
   Skeleton,
+  Stack,
+  TextField,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 import { useSites } from '../hooks/useSites';
-import type { Site, SiteFloor } from '../hooks/useSites';
+import type { Site, SiteFloor, SitePhoto } from '../hooks/useSites';
 import { useTags } from '../hooks/useTags';
 import type { Tag } from '../hooks/useTags';
 import { useSiteCaptures } from '../hooks/useSiteCaptures';
+import { useSitePhotoUpload } from '../hooks/useSitePhotoUpload';
 import { MAPBOX_TOKEN, PILOT_LNG, PILOT_LAT } from '../map/env';
 
 const PotreeViewer = lazy(() => import('../components/Drone/PotreeViewer'));
 
 type ViewMode = 'floor-map' | '3d' | 'photos';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 // ── Coordinate / GeoJSON helpers ──────────────────────────────────────────────
 
@@ -252,11 +270,203 @@ function LoadingMap() {
   return <Skeleton variant="rectangular" height={480} sx={{ borderRadius: 1, transform: 'none' }} />;
 }
 
+// ── SitePhotosPanel ───────────────────────────────────────────────────────────
+
+function SitePhotosPanel({ photos }: { photos: SitePhoto[] }) {
+  const sorted = useMemo(
+    () => [...photos].sort((a, b) => b.takenAt.localeCompare(a.takenAt)),
+    [photos],
+  );
+
+  if (sorted.length === 0) {
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 480 }}>
+        <Typography variant="body2" color="text.secondary">
+          No photos yet — use Upload to add some.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 2 }}>
+      {sorted.map(photo => (
+        <Paper key={photo.storagePath} variant="outlined" sx={{ overflow: 'hidden' }}>
+          <Box
+            component="img"
+            src={photo.url}
+            alt={photo.filename}
+            sx={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', display: 'block' }}
+          />
+          <Box sx={{ p: 1.5 }}>
+            <Typography variant="caption" sx={{ display: 'block', fontWeight: 600 }}>
+              {new Date(photo.takenAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            </Typography>
+            {photo.comment && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
+                {photo.comment}
+              </Typography>
+            )}
+          </Box>
+        </Paper>
+      ))}
+    </Box>
+  );
+}
+
+// ── SitePhotoDialog ───────────────────────────────────────────────────────────
+
+interface SitePhotoDialogProps {
+  open: boolean;
+  siteId: string;
+  onClose: () => void;
+  onUploaded: (photos: SitePhoto[]) => void;
+}
+
+function SitePhotoDialog({ open, siteId, onClose, onUploaded }: SitePhotoDialogProps) {
+  const { state, startUpload, reset } = useSitePhotoUpload(siteId);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [files, setFiles]     = useState<File[]>([]);
+  const [takenAt, setTakenAt] = useState(new Date().toISOString().slice(0, 10));
+  const [comment, setComment] = useState('');
+
+  const today         = new Date().toISOString().slice(0, 10);
+  const oversized     = files.filter(f => f.size > MAX_FILE_SIZE);
+  const uploading     = state.phase === 'uploading';
+  const canUpload     = files.length > 0 && takenAt.length > 0 && oversized.length === 0 && !uploading;
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setFiles(Array.from(e.target.files ?? []));
+  }
+
+  async function handleUpload() {
+    const uploaded = await startUpload(files, takenAt, comment);
+    if (uploaded.length > 0) {
+      onUploaded(uploaded);
+      handleClose();
+    }
+  }
+
+  function handleClose() {
+    reset();
+    setFiles([]);
+    setTakenAt(today);
+    setComment('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    onClose();
+  }
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle>Upload site photos</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          <Box>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFileChange}
+            />
+            <Button
+              variant="outlined"
+              size="small"
+              disabled={uploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Choose photos
+            </Button>
+
+            {files.length > 0 && (
+              <Box sx={{ mt: 1.5 }}>
+                {files.map(f => (
+                  <Typography
+                    key={f.name}
+                    variant="caption"
+                    sx={{
+                      display: 'block',
+                      color: f.size > MAX_FILE_SIZE ? 'error.main' : 'text.secondary',
+                    }}
+                  >
+                    {f.name} — {formatBytes(f.size)}
+                  </Typography>
+                ))}
+                {oversized.length > 0 && (
+                  <Alert severity="error" sx={{ mt: 1 }}>
+                    Files must be 5 MB or smaller. Remove or replace the highlighted items.
+                  </Alert>
+                )}
+              </Box>
+            )}
+          </Box>
+
+          <TextField
+            label="Date taken"
+            type="date"
+            size="small"
+            required
+            value={takenAt}
+            onChange={e => setTakenAt(e.target.value)}
+            slotProps={{ htmlInput: { max: today } }}
+            disabled={uploading}
+          />
+
+          <TextField
+            label="Comment"
+            multiline
+            rows={2}
+            size="small"
+            placeholder="Optional note…"
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            disabled={uploading}
+          />
+
+          {uploading && (
+            <Box>
+              <LinearProgress
+                variant="determinate"
+                value={state.total > 0 ? (state.uploaded / state.total) * 100 : 0}
+              />
+              <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                {state.uploaded} / {state.total} uploaded
+              </Typography>
+            </Box>
+          )}
+
+          {state.phase === 'error' && state.errorMessage && (
+            <Alert severity="error">{state.errorMessage}</Alert>
+          )}
+        </Stack>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} disabled={uploading}>Cancel</Button>
+        <Button variant="contained" onClick={handleUpload} disabled={!canUpload}>
+          Upload
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
+
 // ── SiteMapsPage ──────────────────────────────────────────────────────────────
 
 export default function SiteMapsPage() {
   const { siteId } = useParams<{ siteId: string }>();
-  const [viewMode, setViewMode] = useState<ViewMode>('floor-map');
+  const [viewMode, setViewMode]     = useState<ViewMode>('floor-map');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [localPhotos, setLocalPhotos] = useState<SitePhoto[]>([]);
 
   const { data: sites, isLoading: sitesLoading } = useSites();
   const { data: tags }                            = useTags();
@@ -265,12 +475,25 @@ export default function SiteMapsPage() {
   const site          = sites?.find(s => s.id === siteId) ?? null;
   const latestCapture = captures?.[0] ?? null;
 
+  const allPhotos = useMemo(() => {
+    const apiPhotos = site?.sitePhotos ?? [];
+    const knownPaths = new Set(apiPhotos.map(p => p.storagePath));
+    return [
+      ...apiPhotos,
+      ...localPhotos.filter(p => !knownPaths.has(p.storagePath)),
+    ];
+  }, [site?.sitePhotos, localPhotos]);
+
   // If 3D mode but no capture exists, fall back to floor map
   useEffect(() => {
     if (viewMode === '3d' && captures !== undefined && !latestCapture) {
       setViewMode('floor-map');
     }
   }, [captures, latestCapture, viewMode]);
+
+  function handlePhotosUploaded(photos: SitePhoto[]) {
+    setLocalPhotos(prev => [...prev, ...photos]);
+  }
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -284,9 +507,21 @@ export default function SiteMapsPage() {
       <Paper sx={{ p: 3 }}>
         {/* Toolbar */}
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2.5 }}>
-          <Typography variant="h6">
-            {viewMode === '3d' ? '3D point cloud' : viewMode === 'photos' ? 'Site photos' : 'Floor plan'}
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Typography variant="h6">
+              {viewMode === '3d' ? '3D point cloud' : viewMode === 'photos' ? 'Site photos' : 'Floor plan'}
+            </Typography>
+            {viewMode === 'photos' && (
+              <Button
+                size="small"
+                variant="contained"
+                startIcon={<CloudUploadIcon />}
+                onClick={() => setDialogOpen(true)}
+              >
+                Upload
+              </Button>
+            )}
+          </Box>
           <ToggleButtonGroup
             size="small"
             exclusive
@@ -320,13 +555,20 @@ export default function SiteMapsPage() {
           </Suspense>
         )}
 
-        {/* Site photos placeholder */}
+        {/* Site photos */}
         {viewMode === 'photos' && (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 480, color: 'text.secondary' }}>
-            <Typography>Site photos — coming soon</Typography>
-          </Box>
+          <SitePhotosPanel photos={allPhotos} />
         )}
       </Paper>
+
+      {dialogOpen && siteId && (
+        <SitePhotoDialog
+          open={dialogOpen}
+          siteId={siteId}
+          onClose={() => setDialogOpen(false)}
+          onUploaded={handlePhotosUploaded}
+        />
+      )}
     </Box>
   );
 }
