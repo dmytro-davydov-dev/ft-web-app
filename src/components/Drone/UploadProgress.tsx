@@ -52,7 +52,7 @@ export default function UploadProgress({ total, uploaded, failedFiles, startedAt
               <ListItem key={name} disableGutters sx={{ py: 0 }}>
                 <ListItemText
                   primary={name}
-                  primaryTypographyProps={{ variant: 'caption', color: 'error' }}
+                  slotProps={{ primary: { variant: 'caption', color: 'error' } }}
                 />
               </ListItem>
             ))}

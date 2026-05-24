@@ -12,6 +12,7 @@ export type CaptureStatus =
 
 export interface CaptureMetadata {
   detail?: string;
+  error?: string;
   gsd_cm?: number | null;
   odm_version?: string;
   processed_at?: string;

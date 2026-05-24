@@ -70,7 +70,7 @@ export default function CaptureTimeline({
                       <span>{gsdLabel(capture.metadata?.gsd_cm)}</span>
                     </Box>
                   }
-                  primaryTypographyProps={{ fontWeight: isActive ? 700 : 400 }}
+                  slotProps={{ primary: { sx: { fontWeight: isActive ? 700 : 400 } } }}
                 />
               </ListItemButton>
               {idx < captures.length - 1 && <Divider component="li" />}
