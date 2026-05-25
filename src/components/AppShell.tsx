@@ -11,10 +11,11 @@ import {
   Box, Drawer, AppBar, Toolbar, List, ListSubheader,
   ListItemButton, ListItemIcon, ListItemText, Avatar,
   Typography, TextField, ToggleButton, ToggleButtonGroup,
-  InputAdornment, Divider, Button, SvgIcon,
+  InputAdornment, Divider, Button, SvgIcon, IconButton, useMediaQuery, Tooltip,
 } from '@mui/material';
 
 const DRAWER_WIDTH = 248;
+const TABLET_DRAWER_WIDTH = 64;
 
 interface NavItem {
   to: string;
@@ -65,6 +66,12 @@ export default function AppShell() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('live');
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  const isTablet = useMediaQuery('(min-width: 769px) and (max-width: 1024px)');
+
+  const paperWidth = isTablet ? TABLET_DRAWER_WIDTH : DRAWER_WIDTH;
 
   async function handleSignOut() {
     await signOut();
@@ -78,65 +85,88 @@ export default function AppShell() {
     .slice(0, 2)
     .toUpperCase();
 
-  return (
-    <Box sx={{ display: 'flex', height: '100%', minHeight: '100vh' }}>
-
-      <Drawer
-        variant="permanent"
-        sx={{
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: DRAWER_WIDTH,
-            boxSizing: 'border-box',
-            display: 'flex',
-            flexDirection: 'column',
-            py: 3,
-            px: 1.5,
-          },
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, mb: 3 }}>
+  const drawerContent = (
+    <>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1, mb: 3, ...(isTablet && { justifyContent: 'center' }) }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ...(isMobile && { flex: 1 }) }}>
           <Box sx={{ width: 28, height: 28, borderRadius: '4px', background: 'linear-gradient(135deg, #00d4ff, #7c3aed)', flexShrink: 0 }} />
-          <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.01em' }}>
-            Flowterra
-          </Typography>
+          {!isTablet && (
+            <Typography sx={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '-0.01em' }}>
+              Flowterra
+            </Typography>
+          )}
         </Box>
+        {isMobile && (
+          <IconButton onClick={() => setMobileOpen(false)} aria-label="close navigation" size="small">
+            <IconX />
+          </IconButton>
+        )}
+      </Box>
 
-        <Box sx={{ flex: 1, overflow: 'auto' }}>
-          {NAV_ITEMS.map(({ section, items }) => (
-            <List
-              key={section}
-              disablePadding
-              subheader={
+      <Box sx={{ flex: 1, overflow: 'auto' }}>
+        {NAV_ITEMS.map(({ section, items }) => (
+          <List
+            key={section}
+            disablePadding
+            subheader={
+              !isTablet ? (
                 <ListSubheader
                   disableGutters
                   sx={{ bgcolor: 'transparent', color: 'text.disabled', fontSize: '0.6875rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', lineHeight: 1, pt: 2.5, pb: 1, px: 1 }}
                 >
                   {section}
                 </ListSubheader>
-              }
-            >
-              {items.map(({ to, label, icon: Icon, end }) => (
-                <NavLink key={to} to={to} end={end} style={{ textDecoration: 'none' }}>
-                  {({ isActive }: { isActive: boolean }) => (
-                    <ListItemButton selected={isActive} sx={{ mb: 0.25, gap: 1 }}>
+              ) : undefined
+            }
+          >
+            {items.map(({ to, label, icon: Icon, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                style={{ textDecoration: 'none' }}
+                onClick={() => { if (isMobile) setMobileOpen(false); }}
+              >
+                {({ isActive }: { isActive: boolean }) => {
+                  const btn = (
+                    <ListItemButton
+                      selected={isActive}
+                      sx={{ mb: 0.25, gap: isTablet ? 0 : 1, justifyContent: isTablet ? 'center' : undefined }}
+                    >
                       <ListItemIcon sx={{ minWidth: 'auto' }}>
                         <SvgIcon inheritViewBox sx={{ width: 18, height: 18, color: 'inherit' }}>
                           <Icon />
                         </SvgIcon>
                       </ListItemIcon>
-                      <ListItemText primary={label} />
+                      {!isTablet && <ListItemText primary={label} />}
                     </ListItemButton>
-                  )}
-                </NavLink>
-              ))}
-            </List>
-          ))}
-        </Box>
+                  );
+                  return isTablet ? (
+                    <Tooltip title={label} placement="right">{btn}</Tooltip>
+                  ) : btn;
+                }}
+              </NavLink>
+            ))}
+          </List>
+        ))}
+      </Box>
 
-        <Box>
-          <Divider sx={{ mb: 2 }} />
+      <Box>
+        <Divider sx={{ mb: 2 }} />
+        {isTablet ? (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+            <Tooltip title={user?.displayName ?? user?.email ?? ''} placement="right">
+              <Avatar sx={{ width: 32, height: 32, fontSize: '0.75rem', fontWeight: 700, background: 'linear-gradient(135deg, #00d4ff, #7c3aed)', color: '#041018' }}>
+                {initials}
+              </Avatar>
+            </Tooltip>
+            <Tooltip title="Sign out" placement="right">
+              <IconButton size="small" onClick={handleSignOut} aria-label="Sign out">
+                <IconSignOut />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        ) : (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1 }}>
             <Avatar sx={{ width: 32, height: 32, fontSize: '0.75rem', fontWeight: 700, background: 'linear-gradient(135deg, #00d4ff, #7c3aed)', color: '#041018', flexShrink: 0 }}>
               {initials}
@@ -153,38 +183,88 @@ export default function AppShell() {
               </Button>
             </Box>
           </Box>
-        </Box>
+        )}
+      </Box>
+    </>
+  );
+
+  return (
+    <Box sx={{ display: 'flex', height: '100%', minHeight: '100vh' }}>
+
+      <Drawer
+        variant={isMobile ? 'temporary' : 'permanent'}
+        open={isMobile ? mobileOpen : true}
+        onClose={() => setMobileOpen(false)}
+        sx={{
+          width: isMobile ? 0 : (isTablet ? TABLET_DRAWER_WIDTH : DRAWER_WIDTH),
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: paperWidth,
+            boxSizing: 'border-box',
+            display: 'flex',
+            flexDirection: 'column',
+            py: 3,
+            px: isTablet ? 0.5 : 1.5,
+          },
+        }}
+      >
+        {drawerContent}
       </Drawer>
 
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflowX: 'hidden' }}>
         <AppBar position="sticky" elevation={0} sx={{ left: 0 }}>
-          <Toolbar sx={{ gap: 3, minHeight: '64px !important', px: 4 }}>
-            <TextField
-              size="small"
-              placeholder="Search tags, people, gateways, events…"
-              sx={{ maxWidth: 420, width: '100%' }}
-              slotProps={{
-                input: { startAdornment: <InputAdornment position="start"><IconSearch /></InputAdornment> },
-              }}
-            />
-            <Box sx={{ flex: 1 }} />
-            <ThemeSwitcher />
-            <ToggleButtonGroup
-              value={timeFilter}
-              exclusive
-              onChange={(_e: React.MouseEvent<HTMLElement>, val: TimeFilter | null) => { if (val) setTimeFilter(val); }}
-              size="small"
-              sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '999px', p: '4px', gap: '2px', '& .MuiToggleButtonGroup-grouped': { border: 0, borderRadius: '999px !important', px: 1.75, py: 0.75, fontSize: '0.875rem', fontWeight: 600, color: 'text.secondary', textTransform: 'none', '&.Mui-selected': { bgcolor: 'background.default', color: 'text.primary' }, '&:hover': { bgcolor: 'rgba(255,255,255,0.04)' } } }}
-            >
-              <ToggleButton value="live">Live</ToggleButton>
-              <ToggleButton value="1h">Last hour</ToggleButton>
-              <ToggleButton value="today">Today</ToggleButton>
-              <ToggleButton value="7d">7d</ToggleButton>
-            </ToggleButtonGroup>
+          <Toolbar sx={{ minHeight: '64px !important', px: isMobile ? 2 : 4, gap: isMobile ? 1 : 3 }}>
+            {isMobile ? (
+              <>
+                <IconButton
+                  onClick={() => setMobileOpen(true)}
+                  aria-label="open navigation"
+                  edge="start"
+                >
+                  <IconHamburger />
+                </IconButton>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ width: 24, height: 24, borderRadius: '4px', background: 'linear-gradient(135deg, #00d4ff, #7c3aed)', flexShrink: 0 }} />
+                  <Typography sx={{ fontSize: '1rem', fontWeight: 700, letterSpacing: '-0.01em' }}>
+                    Flowterra
+                  </Typography>
+                </Box>
+                <Box sx={{ flex: 1 }} />
+                <IconButton aria-label="search" size="small">
+                  <IconSearchMd />
+                </IconButton>
+                <ThemeSwitcher />
+              </>
+            ) : (
+              <>
+                <TextField
+                  size="small"
+                  placeholder="Search tags, people, gateways, events…"
+                  sx={{ maxWidth: 420, width: '100%' }}
+                  slotProps={{
+                    input: { startAdornment: <InputAdornment position="start"><IconSearch /></InputAdornment> },
+                  }}
+                />
+                <Box sx={{ flex: 1 }} />
+                <ThemeSwitcher />
+                <ToggleButtonGroup
+                  value={timeFilter}
+                  exclusive
+                  onChange={(_e: React.MouseEvent<HTMLElement>, val: TimeFilter | null) => { if (val) setTimeFilter(val); }}
+                  size="small"
+                  sx={{ bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '999px', p: '4px', gap: '2px', '& .MuiToggleButtonGroup-grouped': { border: 0, borderRadius: '999px !important', px: 1.75, py: 0.75, fontSize: '0.875rem', fontWeight: 600, color: 'text.secondary', textTransform: 'none', '&.Mui-selected': { bgcolor: 'background.default', color: 'text.primary' }, '&:hover': { bgcolor: 'rgba(255,255,255,0.04)' } } }}
+                >
+                  <ToggleButton value="live">Live</ToggleButton>
+                  <ToggleButton value="1h">Last hour</ToggleButton>
+                  <ToggleButton value="today">Today</ToggleButton>
+                  <ToggleButton value="7d">7d</ToggleButton>
+                </ToggleButtonGroup>
+              </>
+            )}
           </Toolbar>
         </AppBar>
 
-        <Box component="main" sx={{ flex: 1, minHeight: 0, overflowY: 'auto', p: 4, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <Box component="main" sx={{ flex: 1, minHeight: 0, overflowY: 'auto', p: isMobile ? 2 : 4, display: 'flex', flexDirection: 'column', gap: isMobile ? 2 : 4 }}>
           <Outlet />
         </Box>
       </Box>
@@ -194,6 +274,18 @@ export default function AppShell() {
 
 function IconSearch() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>;
+}
+function IconSearchMd() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>;
+}
+function IconHamburger() {
+  return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>;
+}
+function IconX() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>;
+}
+function IconSignOut() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>;
 }
 function IconGrid() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>; }
 function IconSites() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>; }

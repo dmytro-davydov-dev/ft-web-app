@@ -71,16 +71,16 @@ export default function DashboardPage() {
 
       {/* KPI row */}
       <Grid container spacing={3}>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+        <Grid size={{ xs: 6, lg: 3 }}>
           <KpiWidget label="Active tags"     value={tagCount} />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+        <Grid size={{ xs: 6, lg: 3 }}>
           <KpiWidget label="People tracked"  value={tagCount} />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+        <Grid size={{ xs: 6, lg: 3 }}>
           <KpiWidget label="Gateways online" value={onlineCount} />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+        <Grid size={{ xs: 6, lg: 3 }}>
           <KpiWidget
             label="Geofence alerts"
             value={alertCount}

@@ -32,7 +32,7 @@ describe('AppShell', () => {
 
     expect(screen.getByText('Flowterra')).toBeInTheDocument();
     expect(screen.getAllByText('Live')).toHaveLength(2);
-    expect(screen.getByText('Assets')).toBeInTheDocument();
+    expect(screen.getAllByText('Assets')[0]).toBeInTheDocument();
     expect(screen.getByText('Analyze')).toBeInTheDocument();
     expect(screen.getByText('Nested dashboard page')).toBeInTheDocument();
     expect(screen.getByText('JD')).toBeInTheDocument();
