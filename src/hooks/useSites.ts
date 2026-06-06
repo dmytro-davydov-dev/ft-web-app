@@ -9,7 +9,7 @@
  * Phase 5 concern (GCS signed URLs via ft-api).
  */
 import useSWR from 'swr';
-import { collection, addDoc, serverTimestamp, doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, setDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { apiFetch } from '../api/client';
 import { useAuth }  from '../context/AuthContext';
@@ -102,7 +102,7 @@ export async function addSitePhoto(
   photo: SitePhoto,
 ): Promise<void> {
   const siteRef = doc(db, 'customers', customerId, 'sites', siteId);
-  await updateDoc(siteRef, { sitePhotos: arrayUnion(photo) });
+  await setDoc(siteRef, { sitePhotos: arrayUnion(photo) }, { merge: true });
 }
 
 interface SitesResponse {
