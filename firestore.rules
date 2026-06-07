@@ -24,14 +24,15 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Sites — managers can create and read; scoped to their tenant
+    // Sites — managers can create and read; scoped to their tenant.
+    // Note: create allows docs without a name field so that photo uploads on
+    // backend-seeded sites (which have no Firestore doc yet) can bootstrap the
+    // document via setDoc+merge. Name validation stays in application code.
     match /customers/{customerId}/sites/{siteId} {
       allow read:   if request.auth != null
                     && request.auth.token.customerId == customerId;
       allow create: if request.auth != null
-                    && request.auth.token.customerId == customerId
-                    && request.resource.data.name is string
-                    && request.resource.data.name.size() > 0;
+                    && request.auth.token.customerId == customerId;
       allow update: if request.auth != null
                     && request.auth.token.customerId == customerId;
       allow delete: if false; // soft-delete only (Phase 5+)
