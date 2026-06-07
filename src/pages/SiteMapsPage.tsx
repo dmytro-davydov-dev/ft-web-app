@@ -26,6 +26,7 @@ import { useTags } from '../hooks/useTags';
 import type { Tag } from '../hooks/useTags';
 import { useSiteCaptures } from '../hooks/useSiteCaptures';
 import { useSitePhotoUpload } from '../hooks/useSitePhotoUpload';
+import { useSitePhotos } from '../hooks/useSitePhotos';
 import { MAPBOX_TOKEN, PILOT_LNG, PILOT_LAT } from '../map/env';
 
 const PotreeViewer = lazy(() => import('../components/Drone/PotreeViewer'));
@@ -466,23 +467,16 @@ export default function SiteMapsPage() {
   const { siteId } = useParams<{ siteId: string }>();
   const [viewMode, setViewMode]     = useState<ViewMode>('floor-map');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [localPhotos, setLocalPhotos] = useState<SitePhoto[]>([]);
-
   const { data: sites, isLoading: sitesLoading } = useSites();
   const { data: tags }                            = useTags();
   const { data: captures }                        = useSiteCaptures(siteId);
+  const firestorePhotos                           = useSitePhotos(siteId);
 
   const site          = sites?.find(s => s.id === siteId) ?? null;
   const latestCapture = captures?.[0] ?? null;
 
-  const allPhotos = useMemo(() => {
-    const apiPhotos = site?.sitePhotos ?? [];
-    const knownPaths = new Set(apiPhotos.map(p => p.storagePath));
-    return [
-      ...apiPhotos,
-      ...localPhotos.filter(p => !knownPaths.has(p.storagePath)),
-    ];
-  }, [site?.sitePhotos, localPhotos]);
+  // Photos come directly from Firestore — real-time, persists across reloads.
+  const allPhotos = firestorePhotos;
 
   // If 3D mode but no capture exists, fall back to floor map
   useEffect(() => {
@@ -491,8 +485,10 @@ export default function SiteMapsPage() {
     }
   }, [captures, latestCapture, viewMode]);
 
-  function handlePhotosUploaded(photos: SitePhoto[]) {
-    setLocalPhotos(prev => [...prev, ...photos]);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  function handlePhotosUploaded(_photos: SitePhoto[]) {
+    // No-op: useSitePhotos listens to Firestore in real-time so the grid
+    // updates automatically when the upload writes the document.
   }
 
   return (
@@ -525,9 +521,12 @@ export default function SiteMapsPage() {
           <ToggleButtonGroup
             size="small"
             exclusive
-            value={viewMode === 'floor-map' ? null : viewMode}
-            onChange={(_, v: '3d' | 'photos' | null) => setViewMode(v ?? 'floor-map')}
+            value={viewMode}
+            onChange={(_, v: ViewMode | null) => { if (v) setViewMode(v); }}
           >
+            <ToggleButton value="floor-map">
+              2D Maps
+            </ToggleButton>
             <ToggleButton value="3d" disabled={!latestCapture}>
               3D Maps
             </ToggleButton>
